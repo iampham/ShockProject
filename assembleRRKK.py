@@ -1,4 +1,19 @@
-def assembleRRKK():
+def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
+    """
+    INPUTS: State & Material parameters to the equation:
+        - Gamma: Mie Gruneisen Parameter
+        - T: Ambient temperature of material
+        - T_0: Reference temperature of material
+        - v: specific volume of material at temp T
+        - v_0: specific volume of material at reference temp
+        - K_0: Reference bulk modulus
+        - rho_0: Initial density
+        - C_v: Specific heat capacity
+        - s: Slope Hugoniot
+        - alpha: Thermal expansion tensor
+
+
+    """
     # assemble total residual 
     RR = np.zeros((n_node*2))
     # assemble the total tangent 
@@ -60,11 +75,23 @@ def assembleRRKK():
             for ni in range(4):
                 F += np.outer(node_x_ei[ni],dNsdX[:,ni])
             # compute the stress
-            detF = np.linalg.det(F)
-            b = np.dot(F,F.transpose())
-            c1 = 1.0 
-            p = 2*c1/(detF*detF)
-            sigma = -p*np.eye(2) + 2*c1*b
+
+            F_p = calculatePlastic()# TODO: Calculate the plastic part of the deformation tensor
+            F_e = F * np.linalg.inv(F_p)
+
+
+            detF_e = np.linalg.det(F_e)
+            C_e = np.dot(F_e.transpose(), F_e)
+            I = np.eye(2)
+            E_e = 1/2 * (np.dot(F_e.transpose(), F_e) - detF_e ** (2/3) * I )
+
+            S_el = np.tensordot(C_elastic, (E_e - alpha * (T-T_ref)))
+
+            chi = 1 - v/v0
+            p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
+            S_eos = -detF_e * p_eos * np.linalg.inv(C_e)
+
+
 
             # compute the variation of the symmetric velocity gradient by moving one node and one component
             # of that node at a time, except if the node is on the boundary in which case no variation is allowed
