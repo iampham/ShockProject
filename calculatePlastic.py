@@ -1,7 +1,8 @@
-def calculateNextPlastic(F_p,gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e):
+import numpy as np 
+def calculateNextPlastic(F_p,gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e, S):
     
     
-    result_inc, g_next=calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e)
+    result_inc, g_next=calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e, S)
 
     F_p_next=np.dot(result_inc,F_p)
 
@@ -35,13 +36,17 @@ def calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_
     F[0:2,0:2] = F_e
     F[2,2] = 1
 
+    S3 = np.zeros([3,3])
+    S3[0:2,0:2] = S
+    S3[2,2] = 1
+
     strainIncrement = np.zeros([3,3])
 
     slipRates = np.zeros([10,1])
 
     for index in range(10):
 
-        slipRates[index] = calculateSlipRate(F,S,gamma_dot_ref, m, g[index], index)
+        slipRates[index], schmidTensor = calculateSlipRate(F,S3,gamma_dot_ref, m, g[index], index)
         strainIncrement += slipRates[index] * schmidTensor
     
     resultant_increment=np.zeros([3,3])
@@ -61,12 +66,14 @@ def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
 
     schmidTensor = getSchmidTensor(index)
     ### Need to verify what equation is correct: report or paper ###
+
+
     tau_s = np.tensordot(np.dot(F.transpose(), np.dot(F,S)), schmidTensor,axes=2) 
 
     tau_th_s = getStrengthRatio(index) * g_si
     slipRate = gamma_dot_ref * np.sign(tau_s) * np.abs(tau_s/tau_th_s)**(1/m)
 
-    return slipRate
+    return slipRate, schmidTensor
 
 def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
 
@@ -106,7 +113,7 @@ def getStrengthRatio(index):
     0.701,\
     0.701])
 
-    strengthRatio = strengthRatios[i]
+    strengthRatio = strengthRatios[index]
 
     return strengthRatio
 

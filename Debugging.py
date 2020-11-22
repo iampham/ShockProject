@@ -25,6 +25,7 @@ for i in range(n_node):
     if X[1]>0.9999: 
         node_x[i,1] = 1.
 
+
 # 2 Dimension Quadrilateral Shape Function
 def Nvec(xi,eta):
     return 0.25*np.array([(1-xi)*(1-eta),(1+xi)*(1-eta),(1+xi)*(1+eta),(1-xi)*(1+eta)])
@@ -46,4 +47,4 @@ s = 1.79 # Slope Hugoniot []
 alpha = np.array([[1,0],[0,1]]) # Thermal expansion tensor []
 
 
-assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha)
+assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha, Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x)
