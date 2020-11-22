@@ -81,6 +81,7 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
 
             detF_e = np.linalg.det(F_e)
             C_e = np.dot(F_e.transpose(), F_e)
+            # special dyadic product of C_e
             I = np.eye(2)
             E_e = 1/2 * (np.dot(F_e.transpose(), F_e) - detF_e ** (2/3) * I )
 
@@ -92,6 +93,8 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
 
             S=S_el+S_eos  # vis dropped for now
 
+            
+
             # compute the variation of the symmetric velocity gradient by moving one node and one component
             # of that node at a time, except if the node is on the boundary in which case no variation is allowed
             for ni in range(4): # deltav and deltau corresponds to a,b in lecture, ni is # nodes in elem
@@ -100,29 +103,34 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
                     # note, no worries about the boundary because we will get rid of the corresponding rows
                     # of the residual because they wont be zero 
                     deltav[ci] = 1
-                    gradx_v = np.outer(deltav,dNsdx[:,ni])
-                    deltad = 0.5*(gradx_v + gradx_v.transpose())
-                    Re[ni*2+ci] += wi*np.linalg.det(dxdxi)*np.tensordot(sigma,deltad)
+                    gradX_v = np.outer(deltav,dNsdX[:,ni])
+                    deltaE= 0.5*(np.dot(F.transpose(),gradX_v) + np.dot(gradX_v.transpose(),F)  )
+                    Re[ni*2+ci] += wi*np.linalg.det(dxdxi)*np.tensordot(S,deltaE)
 
                     # ASSEMBLE INTO GLOBAL RESIDUAL (I didn't ask for this)
-                    RR[node_ei[ni]*2+ci] += wi*np.linalg.det(dxdxi)*np.tensordot(sigma,deltad)
+                    RR[node_ei[ni]*2+ci] += wi*np.linalg.det(dxdxi)*np.tensordot(S,deltaE)
                     
                     ## 2 more for loops for the increment Delta u
                     for nj in range(4):
                         Deltau = np.zeros((2))
                         for cj in range(2):
                             Deltau[cj]=1
-                            gradx_Du = np.outer(Deltau,dNsdx[:,nj])
-                            Deltaeps = 0.5*(gradx_Du + gradx_Du.transpose())
+                            gradX_Du = np.outer(Deltau,dNsdX[:,nj])
+                            # 
+                            Deltaeps = 0.5*(np.dot(gradX_Du.transpose(),F_e) + np.dot(F_e.transpose(),gradX_Du))
                             
                             ## ELEMENT TANGENT
                             # Initial stress component (also called geometric component) is 
-                            # sigma: (gradDeltau^T gradv)
-                            Kgeom = np.tensordot(S,np.dot(gradx_Du.transpose(),gradx_v))
+                            # refer to Linearization.pdf
+                            Kgeom = np.tensordot(S,np.dot(gradX_v.transpose(),gradX_Du) + np.dot(gradX_Du.transpose(),gradX_v))
                             # Material component, need to put things in voigt notation for easy computation
-                            deltad_voigt = np.array([deltad[0,0],deltad[1,1],2*deltad[0,1]])
+                            # deltad_voigt = np.array([deltad[0,0],deltad[1,1],2*deltad[0,1]])
+                            
+                            # D = np.array([[4*p,2*p,0],[2*p,4*p,0],[0,0,2*p]])
                             Deltaeps_voigt = np.array([Deltaeps[0,0],Deltaeps[1,1],2*Deltaeps[0,1]])
-                            D = np.array([[4*p,2*p,0],[2*p,4*p,0],[0,0,2*p]])
+                            Kmat_el = np.dot(C_voigt, Deltaeps_voigt)
+                            F_e_inv=np.linalg.inv(F_e)
+                            Kmat_eos= -p_eos *  (np.dot(J*F_e_inv.transpose(),gradX_Du)) + 
                             Kmat = np.dot(Deltaeps_voigt,np.dot(D,deltad_voigt))
                             # add to the corresponding entry in Ke and dont forget other parts of integral
                             Ke[ni*2+ci,nj*2+cj] += wi*np.linalg.det(dxdxi)*(Kgeom+Kmat)
