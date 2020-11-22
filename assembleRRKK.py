@@ -74,9 +74,8 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
             F = np.zeros((2,2))
             for ni in range(4):
                 F += np.outer(node_x_ei[ni],dNsdX[:,ni])
-            # compute the stress
-
-            F_p = calculatePlastic()# TODO: Calculate the plastic part of the deformation tensor
+            # compute the stress, some parameters not defined
+            F_p = calculateNextPlastic(F_p,gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e)# TODO: Calculate the plastic part of the deformation tensor
             F_e = F * np.linalg.inv(F_p)
 
 
@@ -91,13 +90,13 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
             p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
             S_eos = -detF_e * p_eos * np.linalg.inv(C_e)
 
-
+            S=S_el+S_eos  # vis dropped for now
 
             # compute the variation of the symmetric velocity gradient by moving one node and one component
             # of that node at a time, except if the node is on the boundary in which case no variation is allowed
-            for ni in range(4):
+            for ni in range(4): # deltav and deltau corresponds to a,b in lecture, ni is # nodes in elem
                 deltav = np.zeros((2))
-                for ci in range(2):
+                for ci in range(2): # coord in x and y
                     # note, no worries about the boundary because we will get rid of the corresponding rows
                     # of the residual because they wont be zero 
                     deltav[ci] = 1
@@ -119,7 +118,7 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
                             ## ELEMENT TANGENT
                             # Initial stress component (also called geometric component) is 
                             # sigma: (gradDeltau^T gradv)
-                            Kgeom = np.tensordot(sigma,np.dot(gradx_Du.transpose(),gradx_v))
+                            Kgeom = np.tensordot(S,np.dot(gradx_Du.transpose(),gradx_v))
                             # Material component, need to put things in voigt notation for easy computation
                             deltad_voigt = np.array([deltad[0,0],deltad[1,1],2*deltad[0,1]])
                             Deltaeps_voigt = np.array([Deltaeps[0,0],Deltaeps[1,1],2*Deltaeps[0,1]])

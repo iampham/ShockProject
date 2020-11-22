@@ -1,6 +1,7 @@
 
 import numpy as np 
-
+from assembleRRKK import *
+from calculatePlastic import *
 # Intialize internal vairables
 S = 0 # blah
 

@@ -1,4 +1,13 @@
-def calculatePlastic(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e):
+def calculateNextPlastic(F_p,gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e):
+    
+    
+    result_inc, g_next=calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e)
+
+    F_p_next=np.dot(result_inc,F_p)
+
+    return F_p_next,g_next
+
+def calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e):
     """ 
     Calculates the plastic part of the deformation tensor. Uses the following equation:
     F_p = deltaGamma dot F_p_prev
@@ -30,9 +39,18 @@ def calculatePlastic(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e):
         slipRates[index] = calculateSlipRate(gamma_dot_ref, m, g[index], index)
         strainIncrement += slipRates[index] * schmidTensor
     
+    resultant_increment=np.zeros([3,3])
+    for i in range(3):
+        for j in range(3):
+            if i==j:
+                resultant_increment[i,j] += 1 - strainIncrement[i,j]
+            else:
+                resultant_increment[i,j] += 0 - strainIncrement[i,j]
+
+
     g_next = getNextResistance(g_sat, g, a, h, slipRates, dt)
 
-    return strainIncrement[0:2, 0:2], g_next
+    return resultant_increment[0:2, 0:2], g_next
 
 def calculateSlipRate(gamma_dot_ref, m, g_si, index):
 
