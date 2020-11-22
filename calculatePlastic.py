@@ -46,15 +46,16 @@ def calculateSlipRate(gamma_dot_ref, m, g_si, index):
 
 def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
 
-    g_dot_si = np.zeros([10,1])
+    g_dot = np.zeros([10,1])
 
 
     for i in range(10):
-g_si
-        g_dot_si[i] = h * (1-g_prev[i]/g_sat)**a * slipRates[i]
+
+        g_dot[i] = h * (1-g_prev[i]/g_sat)**a * slipRates[i]
 
 
-    g_current = g_prev + dt*g_dot_si
+    g_current = g_prev + dt*g_dot
+    
     return g_current
 
 
