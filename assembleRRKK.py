@@ -75,7 +75,22 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
             for ni in range(4):
                 F += np.outer(node_x_ei[ni],dNsdX[:,ni])
             # compute the stress, some parameters not defined
-            F_p = calculateNextPlastic(F_p,gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e)# TODO: Calculate the plastic part of the deformation tensor
+            
+            # 1 - Need initial value of F_p and F_e
+            F_e_0 = F
+            F_p_0 = np.eye(2)-F_e_0
+            # 2 - Need values for internal functions
+            gamma_dot_ref = 0.001e-9 # Reference slip rate [s]
+            m = 0.1 # Slip rate exponent []
+            g = 1
+            g_sat = 155.73e6 # Saturation slip resistance [Pa]
+            g_prev = 1
+            a = 2.5 # Hardening exponent []
+            h = 9.34e6*np.ones([10,1]) # Hardening matrix [Pa]
+            dt = 1
+            
+            # Iteration to calculate actual split of F=F_p*F_e
+            F_p = calculateNextPlastic(F_p_0,gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e_0)# TODO: Calculate the plastic part of the deformation tensor
             F_e = F * np.linalg.inv(F_p)
 
 
@@ -148,5 +163,3 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
                             KK[node_ei[ni]*2+ci,node_ei[nj]*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)
                             
     return RR,KK
-                            
-        

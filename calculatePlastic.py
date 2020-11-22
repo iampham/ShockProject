@@ -22,12 +22,17 @@ def calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_
     g_sat
     h_0
     q_sisj
+    
+    # 3 adding deifitions
+    a - Hardening Exponent
+    h - Hardening matrix
 
     
     """ 
 
     F = np.zeros([3,3])
-    F[0:1,0:1] = F_e
+    # 4 - Fixed this should 0:2, not 0:1
+    F[0:2,0:2] = F_e
     F[2,2] = 1
 
     strainIncrement = np.zeros([3,3])
