@@ -7,7 +7,7 @@ def calculateNextPlastic(F_p,gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e):
 
     return F_p_next,g_next
 
-def calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e):
+def calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_e,S):
     """ 
     Calculates the plastic part of the deformation tensor. Uses the following equation:
     F_p = deltaGamma dot F_p_prev
@@ -41,7 +41,7 @@ def calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_
 
     for index in range(10):
 
-        slipRates[index] = calculateSlipRate(gamma_dot_ref, m, g[index], index)
+        slipRates[index] = calculateSlipRate(F,S,gamma_dot_ref, m, g[index], index)
         strainIncrement += slipRates[index] * schmidTensor
     
     resultant_increment=np.zeros([3,3])
@@ -57,13 +57,14 @@ def calculateResultantIncrement(gamma_dot_ref, m, g, g_sat, g_prev, a, h, dt, F_
 
     return resultant_increment[0:2, 0:2], g_next
 
-def calculateSlipRate(gamma_dot_ref, m, g_si, index):
+def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
 
     schmidTensor = getSchmidTensor(index)
-    tau_s = np.dot(np.matmul(F.transpose, np.matmul(F,S)), schmidTensor) 
+    ### Need to verify what equation is correct: report or paper ###
+    tau_s = np.tensordot(np.dot(F.transpose(), np.dot(F,S)), schmidTensor,axes=2) 
 
     tau_th_s = getStrengthRatio(index) * g_si
-    slipRate = gamma_dot_ref * sign(tau_s) * np.abs(tau_s/tau_th_s)**(1/m)
+    slipRate = gamma_dot_ref * np.sign(tau_s) * np.abs(tau_s/tau_th_s)**(1/m)
 
     return slipRate
 

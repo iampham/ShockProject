@@ -84,7 +84,7 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
             m = 0.1 # Slip rate exponent []
             g = 1
             g_sat = 155.73e6 # Saturation slip resistance [Pa]
-            g_prev = 1
+            g_prev = 1*np.ones([10,1]) # NEED CORRECT VALUE [Pa]
             a = 2.5 # Hardening exponent []
             h = 9.34e6*np.ones([10,1]) # Hardening matrix [Pa]
             dt = 1
