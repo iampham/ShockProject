@@ -82,6 +82,15 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
             detF_e = np.linalg.det(F_e)
             C_e = np.dot(F_e.transpose(), F_e)
             # special dyadic product of C_e
+            C_e_inv = np.linalg.inv(C_e)
+            # C_inv Special Dyad C_inv
+            dyad_bar = np.zeros([2,2,2,2])
+            for i in range(2):
+                for j in range(2):
+                    for k in range(2):
+                        for l in range(2):
+                            dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
+
             I = np.eye(2)
             E_e = 1/2 * (np.dot(F_e.transpose(), F_e) - detF_e ** (2/3) * I )
 
