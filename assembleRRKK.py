@@ -114,10 +114,10 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
                     deltav[ci] = 1
                     gradX_v = np.outer(deltav,dNsdX[:,ni])
                     deltaE= 0.5*(np.dot(F.transpose(),gradX_v) + np.dot(gradX_v.transpose(),F)  )
-                    Re[ni*2+ci] += wi*np.linalg.det(dxdxi)*np.tensordot(S,deltaE)
+                    Re[ni*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S,deltaE)
 
                     # ASSEMBLE INTO GLOBAL RESIDUAL (I didn't ask for this)
-                    RR[node_ei[ni]*2+ci] += wi*np.linalg.det(dxdxi)*np.tensordot(S,deltaE)
+                    RR[node_ei[ni]*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S,deltaE)
                     
                     ## 2 more for loops for the increment Delta u
                     for nj in range(4):
@@ -139,12 +139,13 @@ def assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha):
                             Deltaeps_voigt = np.array([Deltaeps[0,0],Deltaeps[1,1],2*Deltaeps[0,1]])
                             Kmat_el = np.dot(C_voigt, Deltaeps_voigt)
                             F_e_inv=np.linalg.inv(F_e)
-                            Kmat_eos= -p_eos *  (np.dot(J*F_e_inv.transpose(),gradX_Du)) + 
-                            Kmat = np.dot(Deltaeps_voigt,np.dot(D,deltad_voigt))
+                            DC_e=np.dot(gradX_Du.transpose(),F) + np.dot(F.transpose(),gradX_Du)
+                            Kmat_eos= -p_eos *  (np.dot(J*F_e_inv.transpose(),gradX_Du)) + np.tensordot(dyad_bar,DC_e)
+                            Kmat = Kmat_el + Kmat_eos
                             # add to the corresponding entry in Ke and dont forget other parts of integral
-                            Ke[ni*2+ci,nj*2+cj] += wi*np.linalg.det(dxdxi)*(Kgeom+Kmat)
+                            Ke[ni*2+ci,nj*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)
                             # assemble into global 
-                            KK[node_ei[ni]*2+ci,node_ei[nj]*2+cj] += wi*np.linalg.det(dxdxi)*(Kgeom+Kmat)
+                            KK[node_ei[ni]*2+ci,node_ei[nj]*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)
                             
     return RR,KK
                             
