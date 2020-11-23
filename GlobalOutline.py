@@ -2,8 +2,6 @@
 import numpy as np 
 from assembleRRKK import *
 from calculatePlastic import *
-# Intialize internal vairables
-S = 0 # blah
 
 
 # Loop over time steps n 
@@ -16,9 +14,58 @@ t_vec = np.linspace(timeStart,timeEnd, nSteps)
 deltat = timeVec[1] - timeVec[0]
 
 
+# Initialize mesh
+n_nodes = 8
+n_elem = 5
+node_X = np.array([[0.,0.],[1.,0.],[1.,1.],[0.,1.],
+                   [0.27,0.25],[0.75,0.27],[0.73,0.75],[0.25,0.73]])
+elements = np.array([[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7],[4,5,6,7]])
+
+# Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
+node_x = np.zeros(node_X.shape)
+for i in range(n_node):
+    X = node_X[i]
+    # first initialize with the same as original
+    node_x[i] = X
+    # but then apply boundary conditions
+    if X[0]<0.00001: 
+        node_x[i,0] = 0.
+    if X[1]<0.00001: 
+        node_x[i,1] = 0.
+    if X[0]>0.9999: 
+        node_x[i,0] = 1.1
+    if X[1]>0.9999: 
+        node_x[i,1] = 1.
+
+
+
+# Intialize internal vairables
+S_all = np.zeros([2,2,nsteps]) # blah
+T_all = 303.15 * np.ones(nSteps) # Kelvin
+p_all = np.zeros([nsteps])
+
+F_all = np.zeros([2,2,nSteps])
+F_e_all = np.zeros([2,2,nSteps])
+F_p_all = np.zeros([2,2,nSteps])
+g_all = np.zeros([10,1,nSteps])
+
+# Initialize first guess for plastic deformation gradient
+F_p_all[:,:,0] = np.eye(2)
+
+
+# Keep track of displacements at all time steps
+u_vec = np.zeros((n_nodes,2,nSteps))
+v_vec = np.zeros((n_nodes,2,nSteps))
+a_vec = np.zeros((n_nodes,2,nSteps))
+
+
+
 # Initial guess of 0 displacement
-u_current = np.array([0], [0])
-v_current = np.array([0], [0]) 
+u_current = np.zeros(n_nodes,2)
+v_current = np.zeros(n_nodes,2)
+
+# TODO: define M, the mass matrix. 
+M = 
 
 # Need to calculate acceleration at current timestep
 RR, KK = assembleRRKK(u_current)
@@ -28,12 +75,9 @@ a_current = np.dot(Minv, -np.dot(C,v_current) - RR + P_current)
 # Initialize external loading vector
 P_vec = np.zeros()
 
-# Keep track of displacements at all time steps
-u_vec = np.zeros((2,2,nSteps))
-v_vec = np.zeros((2,2,nSteps))
-a_vec = np.zeros((2,2,nSteps))
 
-for tIndex in range(len(t_vec)):
+
+for tIndex in range(1, len(t_vec)):
 
        
     # Update velocity, displacement
@@ -41,8 +85,23 @@ for tIndex in range(len(t_vec)):
     u_next = u_current + deltat*v_current + (deltat)**2/2 *a_current
     
     # Newton raphson for global problem
-    RR,KK = assembleRRKK(u_next)
+    res = 1
+    iter = 0
+    tol = 1e-5
+    itermax = 10
+    while(res>tol and iter<itermax):
 
+        RR,KK = assembleRRKK(u_next)
+
+        RRdof= RR[8:]
+        KKdof = KK[8:, 8:]
+
+        res = np.linalg.norm(RRdof)
+        incr_u = -np.linalg.solve(KKdof,RRdof)
+        iter +=1 
+
+        print('iter %i'%iter)
+        print(res)
 
     # Update acceleration
     MassDampInv = np.linalg.inv(M + deltat/2 * C)
@@ -50,9 +109,9 @@ for tIndex in range(len(t_vec)):
 
 
     # Assign variables to the vector so they don't get lost
-    u_vec[tIndex] = u_current
-    v_vec[tIndex] = v_current
-    a_vec[tIndex] = a_current
+    u_vec[:,:,tIndex] = u_current
+    v_vec[:,:,tIndex] = v_current
+    a_vec[:,:,tIndex] = a_current
 
     # 
     u_current = u_next
