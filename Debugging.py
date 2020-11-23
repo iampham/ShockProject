@@ -21,9 +21,9 @@ for i in range(n_node):
     if X[1]<0.00001: 
         node_x[i,1] = 0.
     if X[0]>0.9999: 
-        node_x[i,0] = 1.1
-    if X[1]>0.9999: 
-        node_x[i,1] = 1.
+        node_x[i,0] = 1.8
+    if X[1]>0.9999:     
+        node_x[i,1] = 1.8
 
 
 # 2 Dimension Quadrilateral Shape Function
@@ -86,7 +86,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 res = 1
 iter = 0
 tol = 1e-5
-itermax = 10
+itermax = 100
 while(res>tol and iter<itermax):
 
     RR,KK = assembleRRKK(const_dictionary, Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x)
@@ -96,8 +96,12 @@ while(res>tol and iter<itermax):
 
     res = np.linalg.norm(RRdof)
     incr_u = -np.linalg.solve(KKdof,RRdof)
-    iter +=1 
 
+
+    for i in range(4):
+        node_x[4+i,0] += incr_u[i*2]
+        node_x[4+i,1] += incr_u[i*2+1]
+    iter +=1
     print('iter %i'%iter)
     print(res)
 

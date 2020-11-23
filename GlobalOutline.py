@@ -39,9 +39,53 @@ for i in range(n_node):
 
 
 
+
+# 2 Dimension Quadrilateral Shape Function
+def Nvec(xi,eta):
+    return 0.25*np.array([(1-xi)*(1-eta),(1+xi)*(1-eta),(1+xi)*(1+eta),(1-xi)*(1+eta)])
+
+def dNvecdxi(xi,eta):
+    return 0.25*np.array([[(-1)*(1-eta),(+1)*(1-eta),(+1)*(1+eta),(-1)*(1+eta)],\
+                          [(1-xi)*(-1),(1+xi)*(-1),(1+xi)*(+1),(1-xi)*(+1)]])
+
+
+# Parameters we use in function
+
+# Elastic Tensor CC
+C_ela = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
+                      [10.18,20.34,13.35,0.23,6.96,0.14],\
+                      [9.77,13.35,21.27,-0.004,5.01,0.19],\
+                      [0.058,0.23,-0.004,8.79,0.32,4.16],\
+                      [4.05,6.96,5.01,0.32,6.20,0.22],\
+                      [-0.18,0.14,0.19,4.16,0.22,10.00]]) # elasticity tensor for a 3D problem
+C_ela = C_ela[0:3,0:3] # Elasticity tensor for a 2D problem
+
+const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
+"T" : 303.15, # Ambient temperature of material [K]
+"T_0" : 300, # Reference temperature of material [K]
+"v" : 0.51e3, # (ARBITRARY, something less that v_0) Specific volume of material at temp T [m^3/Kg]
+"rho_0" : 1.891e3 ,# Initial density [Kg/m^3] 
+"v_0" : 1/1.891e3, # specific volume of material at reference temp [m^3/Kg]
+"K_0" : 17.822e9, # Reference bulk modulus [Pa]
+"C_v" : 2357.3, # Specific heat capacity [J/(Kg*K)]
+"s" : 1.79, # Slope Hugoniot []
+"alpha" : np.array([[1,0],[0,1]]), # Thermal expansion tensor []
+"gamma_dot_ref" : 0.001e-9, # Reference slip rate [s]
+"m" : 0.1, # Slip rate exponent []
+"g" : 1, #
+"g_sat" : 155.73e6, # Saturation slip resistance [Pa]
+"g_prev" : 1*np.ones([10,1]), # NEED CORRECT VALUE [Pa]
+"a" : 2.5, # Hardening exponent []
+"h" : 9.34e6, # Hardening matrix [Pa]
+"C_ela" : C_ela
+}
+
+
+
+
 # Intialize internal variables
 S_all = np.zeros([2,2,nsteps]) # blah
-T_all = 303.15 * np.ones(nSteps) # Kelvin
+T_all = const_dictionary["T"] * np.ones(nSteps) # Kelvin
 p_all = np.zeros([nsteps])
 
 F_all = np.zeros([2,2,nSteps])
@@ -100,6 +144,10 @@ for tIndex in range(1, len(t_vec)):
         incr_u = -np.linalg.solve(KKdof,RRdof)
         iter +=1 
 
+        for i in range(4):
+            node_x[4+i,0] += incr_u[i*2]
+            node_x[4+i,1] += incr_u[i*2+1]
+        iter +=1
         print('iter %i'%iter)
         print(res)
 
