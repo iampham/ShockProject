@@ -45,6 +45,32 @@ K_0 = 17.822e9 # Reference bulk modulus [Pa]
 C_v = 2357.3 # Specific heat capacity [J/(Kg*K)]
 s = 1.79 # Slope Hugoniot []
 alpha = np.array([[1,0],[0,1]]) # Thermal expansion tensor []
+gamma_dot_ref = 0.001e-9 # Reference slip rate [s]
+m = 0.1 # Slip rate exponent []
+g = 1
+g_sat = 155.73e6 # Saturation slip resistance [Pa]
+g_prev = 1*np.ones([10,1]) # NEED CORRECT VALUE [Pa]
+a = 2.5 # Hardening exponent []
+h = 9.34e6 # Hardening matrix [Pa]
 
 
-assembleRRKK(Gamma, T, T_0, v, v_0, K_0, rho_0, C_v, s, alpha, Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x)
+
+const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
+"T" : 303.15, # Ambient temperature of material [K]
+"T_0" : 300, # Reference temperature of material [K]
+"v" : 0.51e3, # (ARBITRARY, something less that v_0) Specific volume of material at temp T [m^3/Kg]
+"rho_0" : 1.891e3 ,# Initial density [Kg/m^3] 
+"v_0" : 1/1.891e3, # specific volume of material at reference temp [m^3/Kg]
+"K_0" : 17.822e9, # Reference bulk modulus [Pa]
+"C_v" : 2357.3, # Specific heat capacity [J/(Kg*K)]
+"s" : 1.79, # Slope Hugoniot []
+"alpha" : np.array([[1,0],[0,1]]), # Thermal expansion tensor []
+"gamma_dot_ref" : 0.001e-9, # Reference slip rate [s]
+"m" : 0.1, # Slip rate exponent []
+"g" : 1, #
+"g_sat" : 155.73e6, # Saturation slip resistance [Pa]
+"g_prev" : 1*np.ones([10,1]), # NEED CORRECT VALUE [Pa]
+"a" : 2.5, # Hardening exponent []
+"h" : 9.34e6 # Hardening matrix [Pa]
+}
+assembleRRKK(const_dictionary, Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x)
