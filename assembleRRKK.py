@@ -162,7 +162,8 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                     # of the residual because they wont be zero 
                     deltav[ci] = 1
                     gradX_v = np.outer(deltav,dNsdX[:,ni])
-                    deltaE= 0.5*(np.dot(F.transpose(),gradX_v) + np.dot(gradX_v.transpose(),F)  )
+                    deltaE= 0.5*(np.dot(F.transpose(),gradX_v) + np.dot(gradX_v.transpose(),F))
+                    deltaE_voigt = np.array([deltaE[0,0],deltaE[1,1],2*deltaE[0,1]])
                     Re[ni*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S,deltaE)
 
                     # ASSEMBLE INTO GLOBAL RESIDUAL (I didn't ask for this)
@@ -174,31 +175,37 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                         for cj in range(2):
                             Deltau[cj]=1
                             gradX_Du = np.outer(Deltau,dNsdX[:,nj])
-                            # 
+                            Delta_delta_E = 0.5*np.dot(gradX_v.transpose(),gradX_Du)+\
+                                np.dot(gradX_Du.transpose(),gradX_v)
+                            Delta_delta_E_voigt = np.array([Delta_delta_E[0,0],Delta_delta_E[1,1],2*Delta_delta_E[0,1]])
+                            
                             Deltaeps = 0.5*(np.dot(gradX_Du.transpose(),F_e) + np.dot(F_e.transpose(),gradX_Du))
                             
                             ## ELEMENT TANGENT
                             # Initial stress component (also called geometric component) is 
                             # refer to Linearization.pdf
-                            Kgeom = np.tensordot(S,np.dot(gradX_v.transpose(),gradX_Du) + np.dot(gradX_Du.transpose(),gradX_v))
+                            Kgeom = np.tensordot(S,np.dot(gradX_v.transpose(),gradX_Du) + np.dot(gradX_Du.transpose(),gradX_v),axes=2)
                             # Material component, need to put things in voigt notation for easy computation
                             # deltad_voigt = np.array([deltad[0,0],deltad[1,1],2*deltad[0,1]])
                             
                             # D = np.array([[4*p,2*p,0],[2*p,4*p,0],[0,0,2*p]])
                             Deltaeps_voigt = np.array([Deltaeps[0,0],Deltaeps[1,1],2*Deltaeps[0,1]])
-                            Kmat_el_voigt = np.dot(C_elastic, Deltaeps_voigt)
+                            # First terms of elastic material part
+                            Kmat_el_1 = np.dot(Deltaeps_voigt,np.dot(C_elastic,deltaE_voigt))                           
+                            Kmat_el_2 = np.dot(S_el_voigt,Delta_delta_E_voigt)
+                            Kmat_el = Kmat_el_1 + Kmat_el_2
+                            # Kmat_el_voigt = np.dot(C_elastic, Deltaeps_voigt)
 
-                            print(np.shape(Kmat_el_voigt))
-
-                            Kmat_el = np.zeros([2,2])
-                            Kmat_el[0,0] = Kmat_el_voigt[0]
-                            Kmat_el[1,1] = Kmat_el_voigt[1]
-                            Kmat_el[0,1] = Kmat_el_voigt[2]
-                            Kmat_el[1,0] = Kmat_el_voigt[2]
-
+                            # First terms of eos part
                             F_e_inv=np.linalg.inv(F_e)
-                            DC_e=np.dot(gradX_Du.transpose(),F) + np.dot(F.transpose(),gradX_Du)
-                            Kmat_eos= -p_eos *  (np.tensordot(J*F_e_inv.transpose(),gradX_Du,axes=2)) + np.tensordot(dyad_bar,DC_e)
+                            DC_e=np.dot(gradX_Du.transpose(),F_e) + np.dot(F_e.transpose(),gradX_Du)
+
+                            eos_1 = J*np.tensordot(F_e_inv.transpose(),gradX_Du,axes=2)*C_e_inv
+                            eos_2 = J*np.tensordot(dyad_bar,DC_e)
+                            Kmat_eos_1 = -p_eos*np.tensordot(eos_1+eos_2,deltaE,axes=2)
+                            Kmat_eos_2 = np.tensordot(S_eos,Delta_delta_E,axes=2)
+                            Kmat_eos = Kmat_eos_1 + Kmat_eos_2
+                            # Kmat_eos= -p_eos *  (np.tensordot(J*F_e_inv.transpose(),gradX_Du,axes=2)) + np.tensordot(dyad_bar,DC_e,axes=2)
 
                             print('Kmat_eos',np.shape(Kmat_eos))
                             Kmat = Kmat_el + Kmat_eos
