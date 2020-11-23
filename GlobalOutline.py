@@ -39,7 +39,7 @@ for i in range(n_node):
 
 
 
-# Intialize internal vairables
+# Intialize internal variables
 S_all = np.zeros([2,2,nsteps]) # blah
 T_all = 303.15 * np.ones(nSteps) # Kelvin
 p_all = np.zeros([nsteps])

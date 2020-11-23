@@ -35,6 +35,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
     g_prev = const_dictionary["g_prev"] # NEED CORRECT VALUE [Pa]
     a = const_dictionary["a"] # Hardening exponent []
     h = const_dictionary["h"]# Hardening matrix [Pa]
+    C_elastic = const_dictionary["C_ela"]
 
     # assemble total residual 
     RR = np.zeros((n_node*2))
@@ -114,7 +115,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
             F_e = F * np.linalg.inv(F_p)
 
 
-            detF_e = np.linalg.det(F_e)
+            J = np.linalg.det(F_e)
             C_e = np.dot(F_e.transpose(), F_e)
             # special dyadic product of C_e
             C_e_inv = np.linalg.inv(C_e)
@@ -127,15 +128,28 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                             dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
 
             I = np.eye(2)
-            E_e = 1/2 * (np.dot(F_e.transpose(), F_e) - detF_e ** (2/3) * I )
+            E_e = 1/2 * (np.dot(F_e.transpose(), F_e) - J ** (2/3) * I )
 
-            S_el = np.tensordot(C_elastic, (E_e - alpha * (T-T_ref)))
+            
+            strainTerm=  E_e - alpha*(T-T_0)
+            strainTerm_voigt = np.array([[strainTerm[0,0], strainTerm[1,1], 2*strainTerm[0,1]]])
+            strainTerm_voigt = strainTerm_voigt.transpose()
+            
+            S_el_voigt = np.dot(C_elastic, strainTerm_voigt)
+
+            S_el = np.zeros([2,2])
+            S_el[0,0] = S_el_voigt[0]
+            S_el[1,1] = S_el_voigt[1]
+            S_el[0,1] = S_el_voigt[2] 
+            S_el[1,0] = S_el_voigt[2] 
+            
 
             chi = 1 - v/v_0
             p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
-            S_eos = -detF_e * p_eos * np.linalg.inv(C_e)
+            S_eos = -J * p_eos * np.linalg.inv(C_e)
 
             S=S_el+S_eos  # vis dropped for now
+
 
             
 
@@ -172,12 +186,27 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                             
                             # D = np.array([[4*p,2*p,0],[2*p,4*p,0],[0,0,2*p]])
                             Deltaeps_voigt = np.array([Deltaeps[0,0],Deltaeps[1,1],2*Deltaeps[0,1]])
-                            Kmat_el = np.dot(C_voigt, Deltaeps_voigt)
+                            Kmat_el_voigt = np.dot(C_elastic, Deltaeps_voigt)
+
+                            print(np.shape(Kmat_el_voigt))
+
+                            Kmat_el = np.zeros([2,2])
+                            Kmat_el[0,0] = Kmat_el_voigt[0]
+                            Kmat_el[1,1] = Kmat_el_voigt[1]
+                            Kmat_el[0,1] = Kmat_el_voigt[2]
+                            Kmat_el[1,0] = Kmat_el_voigt[2]
+
                             F_e_inv=np.linalg.inv(F_e)
                             DC_e=np.dot(gradX_Du.transpose(),F) + np.dot(F.transpose(),gradX_Du)
-                            Kmat_eos= -p_eos *  (np.dot(J*F_e_inv.transpose(),gradX_Du)) + np.tensordot(dyad_bar,DC_e)
+                            Kmat_eos= -p_eos *  (np.tensordot(J*F_e_inv.transpose(),gradX_Du,axes=2)) + np.tensordot(dyad_bar,DC_e)
+
+                            print('Kmat_eos',np.shape(Kmat_eos))
                             Kmat = Kmat_el + Kmat_eos
                             # add to the corresponding entry in Ke and dont forget other parts of integral
+
+                            print(np.shape(wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)))
+                            print(np.shape(Kgeom))
+                            print(np.shape(Kmat))
                             Ke[ni*2+ci,nj*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)
                             # assemble into global 
                             KK[node_ei[ni]*2+ci,node_ei[nj]*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)

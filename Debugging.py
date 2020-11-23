@@ -77,6 +77,28 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "g_sat" : 155.73e6, # Saturation slip resistance [Pa]
 "g_prev" : 1*np.ones([10,1]), # NEED CORRECT VALUE [Pa]
 "a" : 2.5, # Hardening exponent []
-"h" : 9.34e6 # Hardening matrix [Pa]
+"h" : 9.34e6, # Hardening matrix [Pa]
+"C_ela" : C_ela
 }
-assembleRRKK(const_dictionary, Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x)
+
+
+# Newton raphson for global problem
+res = 1
+iter = 0
+tol = 1e-5
+itermax = 10
+while(res>tol and iter<itermax):
+
+    RR,KK = assembleRRKK(const_dictionary, Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x)
+
+    RRdof= RR[8:]
+    KKdof = KK[8:, 8:]
+
+    res = np.linalg.norm(RRdof)
+    incr_u = -np.linalg.solve(KKdof,RRdof)
+    iter +=1 
+
+    print('iter %i'%iter)
+    print(res)
+
+print(incr_u)
