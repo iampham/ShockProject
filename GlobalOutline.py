@@ -112,9 +112,35 @@ g_prev=g_all[:,:,:,0]
 M = 
 
 # Need to calculate acceleration at current timestep
-RR, KK,F_p_next,g_next = assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
-a_current = np.dot(Minv, -np.dot(C,v_current) - RR + P_current)
+# Newton raphson for global problem
+res = 1.
+iter = 0
+tol = 1e-5
+itermax = 10
+# newton raphson for initial time step
+while(res>tol and iter<itermax):
 
+    RR, KK,F_p_next,g_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
+
+    RRdof= RR[8:]
+    KKdof = KK[8:, 8:]
+
+    res = np.linalg.norm(RRdof)
+    incr_u = -np.linalg.solve(KKdof,RRdof)
+
+    iter +=1 
+
+    for i in range(4):
+        node_x[4+i,0] += incr_u[i*2]
+        node_x[4+i,1] += incr_u[i*2+1]
+    iter +=1
+    print('iter %i'%iter)
+    print(res)
+a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
+# store in timed var
+u_vec[:,:,0]=incr_u # TODO: u,v,a for all number of nodes
+v_vec[:,:,0]=v_current
+a_vec[:,:,0]=a_current
 
 # Initialize external loading vector
 P_vec = np.zeros()
@@ -131,11 +157,9 @@ for tIndex in range(1, len(t_vec)):
     # Newton raphson for global problem
     res = 1
     iter = 0
-    tol = 1e-5
-    itermax = 10
     while(res>tol and iter<itermax):
 
-        RR, KK,F_p_next,g_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,deltat)
+        RR, KK,F_p_next,g_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
 
         RRdof= RR[8:]
         KKdof = KK[8:, 8:]
@@ -153,11 +177,11 @@ for tIndex in range(1, len(t_vec)):
 
     # Update acceleration
     MassDampInv = np.linalg.inv(M + deltat/2 * C)
-    a_next = np.dot(MassDampInv, ( P_next - RR - deltat/2 * np.dot(C,a_current)) )
+    a_next = np.dot(MassDampInv, (  RR - deltat/2 * np.dot(C,a_current)) )
 
 
     # Assign variables to the vector so they don't get lost
-    u_vec[:,:,tIndex] = u_current
+    u_vec[:,:,tIndex] = u_current # TODO: u,v,a for all number of nodes
     v_vec[:,:,tIndex] = v_current
     a_vec[:,:,tIndex] = a_current
 
