@@ -74,7 +74,6 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "m" : 0.1, # Slip rate exponent []
 "g" : 1, #
 "g_sat" : 155.73e6, # Saturation slip resistance [Pa]
-"g_prev" : 1*np.ones([10,1]), # NEED CORRECT VALUE [Pa]
 "a" : 2.5, # Hardening exponent []
 "h" : 9.34e6, # Hardening matrix [Pa]
 "C_ela" : C_ela
@@ -107,12 +106,13 @@ a_vec = np.zeros((n_nodes,2,nSteps))
 # Initial guess of 0 displacement
 u_current = np.zeros(n_nodes,2)
 v_current = np.zeros(n_nodes,2)
+g_prev=g_all[:,:,0]
 
 # TODO: define M, the mass matrix. 
 M = 
 
 # Need to calculate acceleration at current timestep
-RR, KK = assembleRRKK(u_current)
+RR, KK,F_p_next,g_next = assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
 a_current = np.dot(Minv, -np.dot(C,v_current) - RR + P_current)
 
 
@@ -135,7 +135,7 @@ for tIndex in range(1, len(t_vec)):
     itermax = 10
     while(res>tol and iter<itermax):
 
-        RR,KK = assembleRRKK(u_next)
+        RR, KK,F_p_next,g_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,deltat)
 
         RRdof= RR[8:]
         KKdof = KK[8:, 8:]

@@ -1,7 +1,8 @@
 import numpy as np 
 from calculatePlastic import * 
+from computeSecondPiola import *
 
-def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x):
+def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt):
     """
     INPUTS: State & Material parameters to the equation:
         - Gamma: Mie Gruneisen Parameter
@@ -32,7 +33,6 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
     m = const_dictionary["m"] # Slip rate exponent []
     g = const_dictionary["g"]
     g_sat = const_dictionary["g_sat"]# Saturation slip resistance [Pa]
-    g_prev = const_dictionary["g_prev"] # NEED CORRECT VALUE [Pa]
     a = const_dictionary["a"] # Hardening exponent []
     h = const_dictionary["h"]# Hardening matrix [Pa]
     C_elastic = const_dictionary["C_ela"]
@@ -41,6 +41,10 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
     RR = np.zeros((n_node*2))
     # assemble the total tangent 
     KK = np.zeros((n_node*2,n_node*2))
+    # F_p global for all elements in the mesh
+    F_p_next=np.zeros([2,2,n_elem])
+    # g_next global for all elements in mesh
+    g_next=np.zeros([10,1,n_elem])
     # loop over elements
     for ei in range(n_elem): 
         # initialize the residual for this element
@@ -100,20 +104,24 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
             # compute the stress, some parameters not defined
             
             # 1 - Need initial value of F_p and F_e
-            F_e_0 = F
-            F_p_0 = np.eye(2)
+            F_p_prev_loc = F_p_prev[:,:,ei]
+            # calculate F_e from F and F_p
+            F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
             # 2 - Need values for internal functions
 
 
 
 
-            dt = 1
+
             
             # Iteration to calculate actual split of F=F_p*F_e
-            S_0  = np.eye(2)
-            F_p, g_next = calculateNextPlastic(F_p_0,gamma_dot_ref, m, g_prev, g_sat, g_prev, a, h, dt, F_e_0, S_0)# TODO: Calculate the plastic part of the deformation tensor
+            S_prev=computeSecondPiola(F_e_prev_loc,const_dictionary)
+            F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_cur, g_sat, g_prev, a, h, dt, F_e_prev_loc, S_prev)# TODO: two g?
             F_e = F * np.linalg.inv(F_p)
 
+            # save the new F_p in global var
+            F_p_next[:,:,ei]=F_p
+            g_next[:,:,ei]=g_loc
 
             J = np.linalg.det(F_e)
 
@@ -128,29 +136,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                         for l in range(2):
                             dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
 
-            I = np.eye(2)
-            # print(np.dot(F_e.transpose(), F_e))
-            E_e = 1/2 * (np.dot(F_e.transpose(), F_e) - J**(2/3) * I )
-
-            
-            strainTerm=  E_e - alpha*(T-T_0)
-            strainTerm_voigt = np.array([[strainTerm[0,0], strainTerm[1,1], 2*strainTerm[0,1]]])
-            strainTerm_voigt = strainTerm_voigt.transpose()
-            
-            S_el_voigt = np.dot(C_elastic, strainTerm_voigt)
-
-            S_el = np.zeros([2,2])
-            S_el[0,0] = S_el_voigt[0]
-            S_el[1,1] = S_el_voigt[1]
-            S_el[0,1] = S_el_voigt[2] 
-            S_el[1,0] = S_el_voigt[2] 
-            
-
-            chi = 1 - v/v_0
-            p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
-            S_eos = -J * p_eos * np.linalg.inv(C_e)
-
-            S=S_el+S_eos  # vis dropped for now
+            S=computeSecondPiola(F_e,const_dictionary)
 
 
             
@@ -221,4 +207,4 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                             # assemble into global 
                             KK[node_ei[ni]*2+ci,node_ei[nj]*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)
                             
-    return RR,KK
+    return RR,KK,F_p_next,g_next
