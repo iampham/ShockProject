@@ -116,7 +116,8 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
             
             # Iteration to calculate actual split of F=F_p*F_e
             S_prev=computeSecondPiola(F_e_prev_loc,const_dictionary)
-            F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_cur, g_sat, g_prev, a, h, dt, F_e_prev_loc, S_prev)# TODO: two g?
+            g_prev_loc=g_prev[:,:,ei]
+            F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_prev_loc, S_prev)# TODO: two g?
             F_e = F * np.linalg.inv(F_p)
 
             # save the new F_p in global var

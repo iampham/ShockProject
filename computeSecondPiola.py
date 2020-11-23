@@ -15,7 +15,6 @@ def computeSecondPiola(F_e,const_dictionary):
     m = const_dictionary["m"] # Slip rate exponent []
     g = const_dictionary["g"]
     g_sat = const_dictionary["g_sat"]# Saturation slip resistance [Pa]
-    g_prev = const_dictionary["g_prev"] # NEED CORRECT VALUE [Pa]
     a = const_dictionary["a"] # Hardening exponent []
     h = const_dictionary["h"]# Hardening matrix [Pa]
     C_elastic = const_dictionary["C_ela"]

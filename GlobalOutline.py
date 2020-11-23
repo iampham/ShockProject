@@ -83,14 +83,14 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 
 
 # Intialize internal variables
-S_all = np.zeros([2,2,nsteps]) # blah
-T_all = const_dictionary["T"] * np.ones(nSteps) # Kelvin
+S_all = np.zeros([2,2,n_elem,nsteps]) # blah
+T_all = const_dictionary["T"] * np.ones(nSteps) # Kelvin, should be nnodes* ntime?
 p_all = np.zeros([nsteps])
 
-F_all = np.zeros([2,2,nSteps])
-F_e_all = np.zeros([2,2,nSteps])
-F_p_all = np.zeros([2,2,nSteps])
-g_all = np.zeros([10,1,nSteps])
+F_all = np.zeros([2,2,n_elem,nSteps])
+F_e_all = np.zeros([2,2,n_elem,nSteps])
+F_p_all = np.zeros([2,2,n_elem,nSteps])
+g_all = np.zeros([10,1,n_elem,nSteps])
 
 # Initialize first guess for plastic deformation gradient
 F_p_all[:,:,0] = np.eye(2)
@@ -106,7 +106,7 @@ a_vec = np.zeros((n_nodes,2,nSteps))
 # Initial guess of 0 displacement
 u_current = np.zeros(n_nodes,2)
 v_current = np.zeros(n_nodes,2)
-g_prev=g_all[:,:,0]
+g_prev=g_all[:,:,:,0]
 
 # TODO: define M, the mass matrix. 
 M = 
