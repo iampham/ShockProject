@@ -49,7 +49,6 @@ gamma_dot_ref = 0.001e-9 # Reference slip rate [s]
 m = 0.1 # Slip rate exponent []
 g = 1
 g_sat = 155.73e6 # Saturation slip resistance [Pa]
-g_prev = 1*np.ones([10,1]) # NEED CORRECT VALUE [Pa]
 a = 2.5 # Hardening exponent []
 h = 9.34e6 # Hardening matrix [Pa]
 # Elastic Tensor CC
@@ -75,7 +74,6 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "m" : 0.1, # Slip rate exponent []
 "g" : 1, #
 "g_sat" : 155.73e6, # Saturation slip resistance [Pa]
-"g_prev" : 1*np.ones([10,1]), # NEED CORRECT VALUE [Pa]
 "a" : 2.5, # Hardening exponent []
 "h" : 9.34e6, # Hardening matrix [Pa]
 "C_ela" : C_ela
