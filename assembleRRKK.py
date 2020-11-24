@@ -145,10 +145,10 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
             # compute the variation of the symmetric velocity gradient by moving one node and one component
             # of that node at a time, except if the node is on the boundary in which case no variation is allowed
             for ni in range(4): # deltav and deltau corresponds to a,b in lecture, ni is # nodes in elem
-                deltav = np.zeros((2))
                 for ci in range(2): # coord in x and y
                     # note, no worries about the boundary because we will get rid of the corresponding rows
                     # of the residual because they wont be zero 
+                    deltav = np.zeros((2))
                     deltav[ci] = 1
                     gradX_v = np.outer(deltav,dNsdX[:,ni])
                     deltaE= 0.5*(np.dot(F.transpose(),gradX_v) + np.dot(gradX_v.transpose(),F))
@@ -160,8 +160,8 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                     
                     ## 2 more for loops for the increment Delta u
                     for nj in range(4):
-                        Deltau = np.zeros((2))
                         for cj in range(2):
+                            Deltau = np.zeros((2))
                             Deltau[cj]=1
                             gradX_Du = np.outer(Deltau,dNsdX[:,nj])
                             Delta_delta_E = 0.5*np.dot(gradX_v.transpose(),gradX_Du)+\
