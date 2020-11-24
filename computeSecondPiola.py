@@ -1,10 +1,9 @@
 import numpy as np 
-def computeSecondPiola(F_e,const_dictionary):
+def computeSecondPiola(F_e,const_dictionary,v):
     # Parameters we use in function
     Gamma = const_dictionary["Gamma"] # Mie Gruneisen Parameter []
     T = const_dictionary["T"] # Ambient temperature of material [K]
     T_0 = const_dictionary["T_0"] # Reference temperature of material [K]
-    v = const_dictionary["v"] # (ARBITRARY, something less that v_0) Specific volume of material at temp T [m^3/Kg]
     rho_0 = const_dictionary["rho_0"] # Initial density [Kg/m^3] 
     v_0 = const_dictionary["v_0"] # specific volume of material at reference temp [m^3/Kg]
     K_0 = const_dictionary["K_0"] # Reference bulk modulus [Pa]
@@ -19,6 +18,7 @@ def computeSecondPiola(F_e,const_dictionary):
     h = const_dictionary["h"]# Hardening matrix [Pa]
     C_elastic = const_dictionary["C_ela"]
 
+    
 
     J = np.linalg.det(F_e)
 
@@ -49,4 +49,5 @@ def computeSecondPiola(F_e,const_dictionary):
     S_eos = -J * p_eos * np.linalg.inv(C_e)
 
     S=S_el+S_eos  # vis dropped for now
-    return S
+    
+    return S,S_eos,S_el_voigt,p_eos

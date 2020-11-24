@@ -2,7 +2,7 @@ import numpy as np
 from calculatePlastic import * 
 from computeSecondPiola import *
 
-def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt):
+def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt,shock_bound):
     """
     INPUTS: State & Material parameters to the equation:
         - Gamma: Mie Gruneisen Parameter
@@ -112,12 +112,16 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
 
 
 
-
+            # according to the current shockwave boundary and coordinates of ip, update v
             
+            if x[0]<shock_bound:
+                S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v)
+            else:
+                S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
             # Iteration to calculate actual split of F=F_p*F_e
-            S_prev=computeSecondPiola(F_e_prev_loc,const_dictionary)
+            
             g_prev_loc=g_prev[:,:,ei]
-            F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_prev_loc, S_prev)# TODO: two g?
+            F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_prev_loc, S_prev)
             F_e = F * np.linalg.inv(F_p)
 
             # save the new F_p in global var
@@ -137,9 +141,10 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                         for l in range(2):
                             dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
 
-            S=computeSecondPiola(F_e,const_dictionary)
-
-
+            if x[0]<shock_bound:
+                S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v)
+            else:
+                S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v_0)
             
 
             # compute the variation of the symmetric velocity gradient by moving one node and one component
