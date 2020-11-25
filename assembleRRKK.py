@@ -31,7 +31,6 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
     alpha = const_dictionary["alpha"] # Thermal expansion tensor []
     gamma_dot_ref = const_dictionary["gamma_dot_ref"] # Reference slip rate [s]
     m = const_dictionary["m"] # Slip rate exponent []
-    g = const_dictionary["g"]
     g_sat = const_dictionary["g_sat"]# Saturation slip resistance [Pa]
     a = const_dictionary["a"] # Hardening exponent []
     h = const_dictionary["h"]# Hardening matrix [Pa]

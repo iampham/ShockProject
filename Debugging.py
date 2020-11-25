@@ -72,7 +72,6 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "alpha" : np.array([[1,0],[0,1]]), # Thermal expansion tensor []
 "gamma_dot_ref" : 0.001e-9, # Reference slip rate [s]
 "m" : 0.1, # Slip rate exponent []
-"g" : 1, #
 "g_sat" : 155.73e6, # Saturation slip resistance [Pa]
 "a" : 2.5, # Hardening exponent []
 "h" : 9.34e6, # Hardening matrix [Pa]

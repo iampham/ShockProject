@@ -5,7 +5,7 @@ from calculatePlastic import *
 
 # Parameters we use in function
 
-# Elastic Tensor CC
+# Elastic Tensor CC # TODO verify 
 C_ela = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
                       [10.18,20.34,13.35,0.23,6.96,0.14],\
                       [9.77,13.35,21.27,-0.004,5.01,0.19],\
@@ -15,17 +15,16 @@ C_ela = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
 C_ela = C_ela[0:3,0:3] # Elasticity tensor for a 2D problem
 
 const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
-"T" : 303.15, # Ambient temperature of material [K]
+"T" : 300, # TODO ARBITRARY VALUE FOR NOW Ambient temperature of material [K]
 "T_0" : 300, # Reference temperature of material [K]
 "rho_0" : 1.891e3 ,# Initial density [Kg/m^3] 
 "v_0" : 1/1.891e3, # specific volume of material at reference temp [m^3/Kg]
 "K_0" : 17.822e9, # Reference bulk modulus [Pa]
 "C_v" : 2357.3, # Specific heat capacity [J/(Kg*K)]
 "s" : 1.79, # Slope Hugoniot []
-"alpha" : np.array([[1,0],[0,1]]), # Thermal expansion tensor []
-"gamma_dot_ref" : 0.001e-9, # Reference slip rate [s]
+"alpha" : np.array([[1,0],[0,1]]), # TODO NEED RIGHT TENSOR hermal expansion tensor []
+"gamma_dot_ref" : 0.001e9, # Reference slip rate [s^-1]
 "m" : 0.1, # Slip rate exponent []
-"g" : 1, #
 "g_sat" : 155.73e6, # Saturation slip resistance [Pa]
 "a" : 2.5, # Hardening exponent []
 "h" : 9.34e6, # Hardening matrix [Pa]
@@ -98,36 +97,34 @@ def dNvecdxi(xi,eta):
 
 
 # Intialize internal variables
-S_all = np.zeros([2,2,n_elem,nsteps]) # blah
-T_all = const_dictionary["T"] * np.ones(nSteps) # Kelvin, should be nnodes* ntime?
-p_all = np.zeros([nsteps])
+IP = 4 # Integration points
+S_all = np.zeros([2,2,n_elem*IP,nsteps]) # Contains Stress S for each element and each integration point
+T_all = const_dictionary["T"] * np.ones(nSteps) # TODO (Depends on what temp we put in dicitionary) Kelvin, should be nnodes* ntime?
+# p_all = np.zeros([nsteps])
 
-F_all = np.zeros([2,2,n_elem,nSteps])
-F_e_all = np.zeros([2,2,n_elem,nSteps])
-F_p_all = np.zeros([2,2,n_elem,nSteps])
-g_all = np.zeros([10,1,n_elem,nSteps])
+F_all = np.zeros([2,2,n_elem*IP,nSteps])
+F_e_all = np.zeros([2,2,n_elem*IP,nSteps])
+F_p_all = np.zeros([2,2,n_elem*IP,nSteps])
+g_all = np.zeros([10,1,n_elem*IP,nSteps])
 
 # Initialize first guess for plastic deformation gradient
 F_p_all[:,:,0] = np.eye(2)
-
 
 # Keep track of displacements at all time steps
 u_vec = np.zeros((n_nodes,2,nSteps))
 v_vec = np.zeros((n_nodes,2,nSteps))
 a_vec = np.zeros((n_nodes,2,nSteps))
 
-
-
 # Initial guess of 0 displacement
 u_current = np.zeros(n_nodes,2)
 v_current = np.zeros(n_nodes,2)
 g_prev=g_all[:,:,:,0]
-
-
+F_p_prev = F_p_all[:,:,:,0]
 
 
 # TODO: define M, the mass matrix. 
 M = 
+Minv = 
 
 # Need to calculate acceleration at current timestep
 # Newton raphson for global problem
@@ -144,7 +141,10 @@ while(res>tol and iter<itermax):
     KKdof = KK[8:, 8:]
 
     res = np.linalg.norm(RRdof)
-    incr_u = -np.linalg.solve(KKdof,RRdof)
+    # incr_u = -np.linalg.solve(KKdof,RRdof)
+
+    a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
+    const_dictionary["C_ela"]
 
     iter +=1 
 
@@ -154,11 +154,20 @@ while(res>tol and iter<itermax):
     iter +=1
     print('iter %i'%iter)
     print(res)
-a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
+
+
 # store in timed var
-u_vec[:,:,0]=incr_u # TODO: u,v,a for all number of nodes
+u_vec[:,:,0]=incr_u
 v_vec[:,:,0]=v_current
 a_vec[:,:,0]=a_current
+# TODO Need function to output the following variables to store at each time step
+S_all[:,:,:,0] = 
+F_all[:,:,:,0] = 
+F_e_all[:,:,:,0] = 
+F_p_all[:,:,:,0] = F_p_next
+
+g_all[:,:,:,0] = g_next
+
 
 # Initialize external loading vector
 P_vec = np.zeros()
@@ -168,7 +177,7 @@ P_vec = np.zeros()
 for tIndex in range(1, len(t_vec)):
 
     # update shock boundary
-    shock_bound+=deltat*U_s
+    shock_bound+=deltat*U_s # TODO Verify this shock boundary is valid
 
     # update boudary conditions
     # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
@@ -212,16 +221,23 @@ for tIndex in range(1, len(t_vec)):
         print(res)
 
     # Update acceleration
-    MassDampInv = np.linalg.inv(M + deltat/2 * C)
-    a_next = np.dot(MassDampInv, (  RR - deltat/2 * np.dot(C,a_current)) )
+    # MassDampInv = np.linalg.inv(M + deltat/2 * C)
+    # a_next = np.dot(MassDampInv, (  RR - deltat/2 * np.dot(C,a_current)) )
 
+    # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
+    # store in timed var
+    u_vec[:,:,tIndex]=incr_u
+    v_vec[:,:,tIndex]=v_current
+    a_vec[:,:,tIndex]=a_current
+    # TODO Need function to output the following variables to store at each time step
+    S_all[:,:,:,tIndex] = 
+    F_all[:,:,:,tIndex] = 
+    F_e_all[:,:,:,tIndex] = 
+    F_p_all[:,:,:,tIndex] = F_p_next
 
-    # Assign variables to the vector so they don't get lost
-    u_vec[:,:,tIndex] = u_current # TODO: u,v,a for all number of nodes
-    v_vec[:,:,tIndex] = v_current
-    a_vec[:,:,tIndex] = a_current
+    g_all[:,:,:,tIndex] = g_next
 
     # 
     u_current = u_next
     v_current = v_next
-    a_current = a_next
+    # a_current = a_next
