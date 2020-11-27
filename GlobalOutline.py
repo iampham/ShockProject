@@ -29,7 +29,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "a" : 2.5, # Hardening exponent []
 "h" : 9.34e6, # Hardening matrix [Pa]
 "C_ela" : C_ela,
-"C_s": 3070 # reference bulk speed of sound [m/s] 
+"C_s": 3070, # reference bulk speed of sound [m/s] 
 "n_IP":4 # integration pts per elem
 }
 
@@ -118,12 +118,12 @@ for i_elem in range(n_elem):
 
 # Keep track of displacements at all time steps
 u_vec = np.zeros((n_nodes,2,nSteps))
-v_vec = np.zeros((n_nodes,2,nSteps))
-a_vec = np.zeros((n_nodes,2,nSteps))
+# v_vec = np.zeros((n_nodes,2,nSteps))
+# a_vec = np.zeros((n_nodes,2,nSteps))
 
 # Initial guess of 0 displacement
-u_current = np.zeros(n_nodes,2)
-v_current = np.zeros(n_nodes,2)
+# u_current = np.zeros(n_nodes,2)
+# v_current = np.zeros(n_nodes,2)
 g_prev=g_all[:,:,:,:,0]
 F_p_prev = F_p_all[:,:,:,:,0]
 
@@ -202,7 +202,7 @@ for tIndex in range(1, len(t_vec)):
 
     # Update velocity, displacement
     # v_next = v_current +1/2 * deltat (a_current + a_next)
-    u_next = u_current + deltat*v_current + (deltat)**2/2 *a_current
+    # u_next = u_current + deltat*v_current + (deltat)**2/2 *a_current
     
     # Newton raphson for global problem
     res = 1
@@ -234,7 +234,6 @@ for tIndex in range(1, len(t_vec)):
     u_vec[:,:,tIndex]=incr_u
     # v_vec[:,:,tIndex]=v_current
     # a_vec[:,:,tIndex]=a_current
-    # TODO Need function to output the following variables to store at each time step
     S_all[:,:,:,:,tIndex] = S_next
     F_all[:,:,:,:,tIndex] = F_next
     F_e_all[:,:,:,:,tIndex] = F_e_next
@@ -243,6 +242,6 @@ for tIndex in range(1, len(t_vec)):
     g_all[:,:,:,:,tIndex] = g_next
 
     # 
-    u_current = u_next
+    # u_current = u_next
     # v_current = v_next
     # a_current = a_next
