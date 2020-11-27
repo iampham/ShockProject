@@ -35,15 +35,19 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
     a = const_dictionary["a"] # Hardening exponent []
     h = const_dictionary["h"]# Hardening matrix [Pa]
     C_elastic = const_dictionary["C_ela"]
+    n_IP=const_dictionary["n_IP"]
 
     # assemble total residual 
     RR = np.zeros((n_node*2))
     # assemble the total tangent 
     KK = np.zeros((n_node*2,n_node*2))
     # F_p global for all elements in the mesh
-    F_p_next=np.zeros([2,2,n_elem])
+    F_p_next=np.zeros([2,2,n_elem,n_IP])
     # g_next global for all elements in mesh
-    g_next=np.zeros([10,1,n_elem])
+    g_next=np.zeros([10,1,n_elem,n_IP])
+    S_next=np.zeros([2,2,n_elem,n_IP])
+    F_next=np.zeros([2,2,n_elem,n_IP])
+    F_e_next=np.zeros([2,2,n_elem,n_IP])
     # loop over elements
     for ei in range(n_elem): 
         # initialize the residual for this element
@@ -67,7 +71,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
         IP_xi = np.array([[-1./np.sqrt(3),-1./np.sqrt(3)],[+1./np.sqrt(3),-1./np.sqrt(3)],\
                           [+1./np.sqrt(3),+1./np.sqrt(3)],[-1./np.sqrt(3),+1./np.sqrt(3)]])
         IP_wi = np.array([1.,1.,1.,1.])
-        for ip in range(4):
+        for ip in range(n_IP):
             xi  = IP_xi[ip,0]
             eta = IP_xi[ip,1]
             wi = IP_wi[ip]
@@ -103,7 +107,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
             # compute the stress, some parameters not defined
             
             # 1 - Need initial value of F_p and F_e
-            F_p_prev_loc = F_p_prev[:,:,ei]
+            F_p_prev_loc = F_p_prev[:,:,ei,ip]
             # calculate F_e from F and F_p
             F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
             # 2 - Need values for internal functions
@@ -119,13 +123,13 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                 S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
             # Iteration to calculate actual split of F=F_p*F_e
             
-            g_prev_loc=g_prev[:,:,ei]
+            g_prev_loc=g_prev[:,:,ei,ip]
             F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_prev_loc, S_prev)
             F_e = F * np.linalg.inv(F_p)
 
             # save the new F_p in global var
-            F_p_next[:,:,ei]=F_p
-            g_next[:,:,ei]=g_loc
+            F_p_next[:,:,ei,ip]=F_p
+            g_next[:,:,ei,ip]=g_loc
 
             J = np.linalg.det(F_e)
 
@@ -145,6 +149,10 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
             else:
                 S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v_0)
             
+            # store results in global variables
+            S_next[:,:,ei,ip] = S
+            F_e_next[:,:,ei,ip] = F_e
+            F_next[:,:,ei,ip] = F
 
             # compute the variation of the symmetric velocity gradient by moving one node and one component
             # of that node at a time, except if the node is on the boundary in which case no variation is allowed
@@ -212,4 +220,4 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
                             # assemble into global 
                             KK[node_ei[ni]*2+ci,node_ei[nj]*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)
                             
-    return RR,KK,F_p_next,g_next
+    return RR,KK,F_p_next,g_next,S_next,F_e_next,F_next

@@ -30,6 +30,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "h" : 9.34e6, # Hardening matrix [Pa]
 "C_ela" : C_ela,
 "C_s": 3070 # reference bulk speed of sound [m/s] 
+"n_IP":4 # integration pts per elem
 }
 
 # Loop over time steps n 
@@ -97,21 +98,23 @@ def dNvecdxi(xi,eta):
 
 
 # Intialize internal variables
-IP = 4 # Integration points
-S_all = np.zeros([2,2,n_elem,IP,nsteps]) # Contains Stress S for each element and each integration point
+n_IP = 4 # Integration points
+S_all = np.zeros([2,2,n_elem,n_IP,nsteps]) # Contains Stress S for each element and each integration point
 T_all = const_dictionary["T"] * np.ones(nSteps) # TODO (Depends on what temp we put in dicitionary) Kelvin, should be nnodes* ntime?
 # p_all = np.zeros([nsteps])
 
-F_all = np.zeros([2,2,n_elem,IP,nSteps])
-F_e_all = np.zeros([2,2,n_elem,IP,nSteps])
-F_p_all = np.zeros([2,2,n_elem,IP,nSteps])
-g_all = np.zeros([10,1,n_elem,IP,nSteps])
+F_all = np.zeros([2,2,n_elem,n_IP,nSteps])
+F_e_all = np.zeros([2,2,n_elem,n_IP,nSteps])
+F_p_all = np.zeros([2,2,n_elem,n_IP,nSteps])
+g_all = np.zeros([10,1,n_elem,n_IP,nSteps])
 
 # Intitial condition of hardening
-g_all[:,:,:,0] = np.ones([10,1,n_elem,IP])
+g_all[:,:,:,:,0] = np.ones([10,1,n_elem,n_IP])
 
 # Initialize first guess for plastic deformation gradient
-F_p_all[:,:,0] = np.eye(2)
+for i_elem in range(n_elem):
+    for i_p in range(n_IP): # 4 
+        F_p_all[:,:,i_elem,i_p,0] = np.eye(2)
 
 # Keep track of displacements at all time steps
 u_vec = np.zeros((n_nodes,2,nSteps))
@@ -121,13 +124,13 @@ a_vec = np.zeros((n_nodes,2,nSteps))
 # Initial guess of 0 displacement
 u_current = np.zeros(n_nodes,2)
 v_current = np.zeros(n_nodes,2)
-g_prev=g_all[:,:,:,0]
-F_p_prev = F_p_all[:,:,:,0]
+g_prev=g_all[:,:,:,:,0]
+F_p_prev = F_p_all[:,:,:,:,0]
 
 
-# TODO: define M, the mass matrix. 
-M = 
-Minv = 
+# # TODO: define M, the mass matrix. 
+# M = 
+# Minv = 
 
 # Need to calculate acceleration at current timestep
 # Newton raphson for global problem
@@ -138,7 +141,7 @@ itermax = 10
 # newton raphson for initial time step
 while(res>tol and iter<itermax):
 
-    RR, KK,F_p_next,g_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
+    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
 
     RRdof= RR[8:]
     KKdof = KK[8:, 8:]
@@ -161,21 +164,20 @@ while(res>tol and iter<itermax):
 
 # store in timed var
 u_vec[:,:,0]=incr_u
-v_vec[:,:,0]=v_current
-a_vec[:,:,0]=a_current
-# TODO Need function to output the following variables to store at each time step
-S_all[:,:,:,0] = 
-F_all[:,:,:,0] = 
-F_e_all[:,:,:,0] = 
-F_p_all[:,:,:,0] = F_p_next
-
-g_all[:,:,:,0] = g_next
+# v_vec[:,:,0]=v_current
+# a_vec[:,:,0]=a_current
+S_all[:,:,:,:,0] = S_next
+F_all[:,:,:,:,0] = F_e_next
+F_e_all[:,:,:,:,0] = F_next
+F_p_all[:,:,:,:,0] = F_p_next
+g_all[:,:,:,:,0] = g_next
 
 
 # Initialize external loading vector
 P_vec = np.zeros()
 
 
+# start of time loop
 
 for tIndex in range(1, len(t_vec)):
 
@@ -199,7 +201,7 @@ for tIndex in range(1, len(t_vec)):
         #     node_x[i,1] = 1.
 
     # Update velocity, displacement
-    v_next = v_current +1/2 * deltat (a_current + a_next)
+    # v_next = v_current +1/2 * deltat (a_current + a_next)
     u_next = u_current + deltat*v_current + (deltat)**2/2 *a_current
     
     # Newton raphson for global problem
@@ -207,7 +209,7 @@ for tIndex in range(1, len(t_vec)):
     iter = 0
     while(res>tol and iter<itermax):
 
-        RR, KK,F_p_next,g_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,shock_bound)
+        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,shock_bound)
 
         RRdof= RR[8:]
         KKdof = KK[8:, 8:]
@@ -230,17 +232,17 @@ for tIndex in range(1, len(t_vec)):
     # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
     # store in timed var
     u_vec[:,:,tIndex]=incr_u
-    v_vec[:,:,tIndex]=v_current
-    a_vec[:,:,tIndex]=a_current
+    # v_vec[:,:,tIndex]=v_current
+    # a_vec[:,:,tIndex]=a_current
     # TODO Need function to output the following variables to store at each time step
-    S_all[:,:,:,tIndex] = 
-    F_all[:,:,:,tIndex] = 
-    F_e_all[:,:,:,tIndex] = 
-    F_p_all[:,:,:,tIndex] = F_p_next
+    S_all[:,:,:,:,tIndex] = S_next
+    F_all[:,:,:,:,tIndex] = F_next
+    F_e_all[:,:,:,:,tIndex] = F_e_next
+    F_p_all[:,:,:,:,tIndex] = F_p_next
 
-    g_all[:,:,:,tIndex] = g_next
+    g_all[:,:,:,:,tIndex] = g_next
 
     # 
     u_current = u_next
-    v_current = v_next
+    # v_current = v_next
     # a_current = a_next
