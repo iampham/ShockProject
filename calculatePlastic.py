@@ -84,7 +84,7 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
 
         g_dot[i] = h * (1-g_prev[i]/g_sat)**a * slipRates[i]
 
-
+    # Time discretization of ODE
     g_current = g_prev + dt*g_dot
     
     return g_current

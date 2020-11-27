@@ -98,14 +98,17 @@ def dNvecdxi(xi,eta):
 
 # Intialize internal variables
 IP = 4 # Integration points
-S_all = np.zeros([2,2,n_elem*IP,nsteps]) # Contains Stress S for each element and each integration point
+S_all = np.zeros([2,2,n_elem,IP,nsteps]) # Contains Stress S for each element and each integration point
 T_all = const_dictionary["T"] * np.ones(nSteps) # TODO (Depends on what temp we put in dicitionary) Kelvin, should be nnodes* ntime?
 # p_all = np.zeros([nsteps])
 
-F_all = np.zeros([2,2,n_elem*IP,nSteps])
-F_e_all = np.zeros([2,2,n_elem*IP,nSteps])
-F_p_all = np.zeros([2,2,n_elem*IP,nSteps])
-g_all = np.zeros([10,1,n_elem*IP,nSteps])
+F_all = np.zeros([2,2,n_elem,IP,nSteps])
+F_e_all = np.zeros([2,2,n_elem,IP,nSteps])
+F_p_all = np.zeros([2,2,n_elem,IP,nSteps])
+g_all = np.zeros([10,1,n_elem,IP,nSteps])
+
+# Intitial condition of hardening
+g_all[:,:,:,0] = np.ones([10,1,n_elem,IP])
 
 # Initialize first guess for plastic deformation gradient
 F_p_all[:,:,0] = np.eye(2)
