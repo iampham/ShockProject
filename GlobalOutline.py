@@ -149,10 +149,10 @@ while(res>tol and iter<itermax):
     res = np.linalg.norm(RRdof)
     # incr_u = -np.linalg.solve(KKdof,RRdof)
 
-    a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
-    const_dictionary["C_ela"]
+    # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
+    # const_dictionary["C_ela"]
 
-    iter +=1 
+    # iter +=1 
 
     for i in range(4):
         node_x[4+i,0] += incr_u[i*2]
