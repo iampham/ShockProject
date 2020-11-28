@@ -125,7 +125,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
             
             g_prev_loc=g_prev[:,:,ei,ip]
             F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_prev_loc, S_prev)
-            F_e = F * np.linalg.inv(F_p)
+            F_e = np.dot(F,  np.linalg.inv(F_p))
 
             # save the new F_p in global var
             F_p_next[:,:,ei,ip]=F_p
