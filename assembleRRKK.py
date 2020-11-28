@@ -2,7 +2,7 @@ import numpy as np
 from calculatePlastic import * 
 from computeSecondPiola import *
 
-def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt,shock_bound):
+def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt,shock_bound):
     """
     INPUTS: State & Material parameters to the equation:
         - Gamma: Mie Gruneisen Parameter
@@ -38,9 +38,9 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
     n_IP=const_dictionary["n_IP"]
 
     # assemble total residual 
-    RR = np.zeros((n_node*2))
+    RR = np.zeros((n_nodes*2))
     # assemble the total tangent 
-    KK = np.zeros((n_node*2,n_node*2))
+    KK = np.zeros((n_nodes*2,n_nodes*2))
     # F_p global for all elements in the mesh
     F_p_next=np.zeros([2,2,n_elem,n_IP])
     # g_next global for all elements in mesh
@@ -125,7 +125,15 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node
             
             g_prev_loc=g_prev[:,:,ei,ip]
             F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_prev_loc, S_prev)
-            F_e = np.dot(F,  np.linalg.inv(F_p))
+            # TODO we are getting a huge F_p (1e80+) and that makes F_e really small
+            # print("F_p_prev_loc",F_p_prev_loc,"gamma_dot_ref",gamma_dot_ref,"m",m, "g_sat",g_sat, "g_prev_loc",g_prev_loc,\
+            #       "a",a, "h",h, "dt",dt, "F_e_prev_loc",F_e_prev_loc, "S_prev",S_prev)
+
+            # F_p = np.eye(2) # TODO 27 nov 2020 debugging proved that elastic part is working properly, still need to figure out how to make the plastic part work
+            F_e = np.dot(F,  np.linalg.inv(F_p))            
+            # print("F",F)
+            # print("F_p",F_p)
+            # print("F_e",F_e)
 
             # save the new F_p in global var
             F_p_next[:,:,ei,ip]=F_p

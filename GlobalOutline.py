@@ -35,12 +35,12 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 
 # Loop over time steps n 
 timeStart = 0
-timeEnd = 100
+timeEnd = 1e-3
 nSteps = 100
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
 # Calculate the size of the timestep
-deltat = timeVec[1] - timeVec[0]
+deltat = t_vec[1] - t_vec[0]
 
 # particle vel
 U_p=100 # 100m/s
@@ -66,12 +66,12 @@ elements = np.array([[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7],[4,5,6,7]])
 
 # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
 node_x = np.zeros(node_X.shape)
-for i in range(n_node):
+for i in range(n_nodes):
     X = node_X[i]
     # first initialize with the same as original
     node_x[i] = X
     # but then apply boundary conditions
-    if X[0]<=deltat*U_p
+    if X[0]<=deltat*U_p:
         node_x[i,0] += deltat*U_p
     if X[1]<0.00001: 
         node_x[i,1] = 0.
@@ -99,9 +99,9 @@ def dNvecdxi(xi,eta):
 
 # Intialize internal variables
 n_IP = 4 # Integration points
-S_all = np.zeros([2,2,n_elem,n_IP,nsteps]) # Contains Stress S for each element and each integration point
+S_all = np.zeros([2,2,n_elem,n_IP,nSteps]) # Contains Stress S for each element and each integration point
 T_all = const_dictionary["T"] * np.ones(nSteps) # TODO (Depends on what temp we put in dicitionary) Kelvin, should be nnodes* ntime?
-# p_all = np.zeros([nsteps])
+# p_all = np.zeros([nSteps])
 
 F_all = np.zeros([2,2,n_elem,n_IP,nSteps])
 F_e_all = np.zeros([2,2,n_elem,n_IP,nSteps])
@@ -137,17 +137,23 @@ F_p_prev = F_p_all[:,:,:,:,0]
 res = 1.
 iter = 0
 tol = 1e-5
-itermax = 10
+itermax = 100
+
+# Initial shock boundary
+shock_bound = 0 
+
+print("Time Step 0")
+
 # newton raphson for initial time step
 while(res>tol and iter<itermax):
 
-    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
+    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,shock_bound)
 
     RRdof= RR[8:]
     KKdof = KK[8:, 8:]
 
     res = np.linalg.norm(RRdof)
-    # incr_u = -np.linalg.solve(KKdof,RRdof)
+    incr_u = -np.linalg.solve(KKdof,RRdof)
 
     # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
     # const_dictionary["C_ela"]
@@ -158,12 +164,13 @@ while(res>tol and iter<itermax):
         node_x[4+i,0] += incr_u[i*2]
         node_x[4+i,1] += incr_u[i*2+1]
     iter +=1
-    print('iter %i'%iter)
-    print(res)
+
+print('NR iterations %i, res %1.7e'%(iter,res))
 
 
 # store in timed var
-u_vec[:,:,0]=incr_u
+# u_vec[:,:,0]=incr_u
+u_vec[:,:,0]=node_x # Storing deformed x instead of displacement u
 # v_vec[:,:,0]=v_current
 # a_vec[:,:,0]=a_current
 S_all[:,:,:,:,0] = S_next
@@ -174,22 +181,24 @@ g_all[:,:,:,:,0] = g_next
 
 
 # Initialize external loading vector
-P_vec = np.zeros()
+# P_vec = np.zeros()
 
 
 # start of time loop
 
 for tIndex in range(1, len(t_vec)):
 
+    print("Time Step",tIndex)
+
     # update shock boundary
     shock_bound+=deltat*U_s # TODO Verify this shock boundary is valid
 
     # update boudary conditions
     # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
-    for i in range(n_node):
+    for i in range(n_nodes):
         X = node_X[i]
         # but then apply boundary conditions
-        if X[0]<=deltat*U_p
+        if X[0]<=deltat*U_p:
             node_x[i,0] += deltat*U_p
         # TODO: commented BS for testing
         # if X[1]<0.00001: 
@@ -209,21 +218,20 @@ for tIndex in range(1, len(t_vec)):
     iter = 0
     while(res>tol and iter<itermax):
 
-        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_node, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,shock_bound)
+        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,shock_bound)
 
         RRdof= RR[8:]
         KKdof = KK[8:, 8:]
 
         res = np.linalg.norm(RRdof)
         incr_u = -np.linalg.solve(KKdof,RRdof)
-        iter +=1 
-
+        
         for i in range(4):
             node_x[4+i,0] += incr_u[i*2]
             node_x[4+i,1] += incr_u[i*2+1]
         iter +=1
-        print('iter %i'%iter)
-        print(res)
+
+    print('NR iterations %i, res %1.7e'%(iter,res))
 
     # Update acceleration
     # MassDampInv = np.linalg.inv(M + deltat/2 * C)
@@ -231,7 +239,8 @@ for tIndex in range(1, len(t_vec)):
 
     # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
     # store in timed var
-    u_vec[:,:,tIndex]=incr_u
+    # u_vec[:,:,tIndex]=incr_u
+    u_vec[:,:,tIndex]=node_x # Storing deformed x instead of displacement u
     # v_vec[:,:,tIndex]=v_current
     # a_vec[:,:,tIndex]=a_current
     S_all[:,:,:,:,tIndex] = S_next
