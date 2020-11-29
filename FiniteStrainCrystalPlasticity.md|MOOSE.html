@@ -1,0 +1,2580 @@
+<!DOCTYPE html><head><meta charset="UTF-8"><title>FiniteStrainCrystalPlasticity.md|MOOSE</title><link rel="icon" type="image/x-icon" href="../../media/moose.ico" sizes="16x16 32x32 64x64 128x128"></link><link href="../../contrib/materialize/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"></link><link href="../../contrib/prism/prism.min.css" type="text/css" rel="stylesheet"></link><link href="../../css/moose.css" type="text/css" rel="stylesheet"></link><link href="../../css/alert_moose.css" type="text/css" rel="stylesheet"></link><link href="../../contrib/katex/katex.min.css" type="text/css" rel="stylesheet"></link><link href="../../css/katex_moose.css" type="text/css" rel="stylesheet"></link><link href="../../css/content_moose.css" type="text/css" rel="stylesheet"></link><link href="../../css/civet_moose.css" type="text/css" rel="stylesheet"></link><link href="../../css/sqa_moose.css" type="text/css" rel="stylesheet"></link><script type="text/javascript" src="../../contrib/jquery/jquery.min.js"></script><script type="text/javascript" src="../../contrib/katex/katex.min.js"></script><script type="text/javascript" src="../../contrib/plotly/plotly.min.js"></script></head><body><div class="page-wrap"><header><nav><div class="nav-wrapper container"><a href="https://www.mooseframework.org" class="left moose-logo hide-on-med-and-down">MOOSE</a><a href="https://github.com/idaholab/moose" class="right"><img src="../../media/framework/github-logo.png" class="github-mark"></img><img src="../../media/framework/github-mark.png" class="github-logo"></img></a><ul class="right hide-on-med-and-down"><li class="moose-mega-menu-trigger" data-target="c977c99b-ce68-4709-9ce1-f4f287d2c7a3"><a>Getting Started<i class="material-icons right">arrow_drop_down</i></a></li><li class="moose-mega-menu-trigger" data-target="660fc7a4-8d1d-4c3a-8dcc-45802f6aa4ed"><a>Documentation<i class="material-icons right">arrow_drop_down</i></a></li><li class="moose-mega-menu-trigger" data-target="737f5857-aab5-40f3-8e38-c529119d16c9"><a>Help<i class="material-icons right">arrow_drop_down</i></a></li><li><a href="../../gallery.html">Gallery</a></li><li><a href="../../newsletter/index.html">News</a></li><li><a href="../../citing.html">Citing</a></li></ul><a href="#" class="sidenav-trigger" data-target="0cc9dd68-ba7e-4d59-a412-a90f0b37ea25"><i class="material-icons">menu</i></a><ul class="sidenav" id="0cc9dd68-ba7e-4d59-a412-a90f0b37ea25"><li><a href="../../getting_started.menu.html">Getting Started</a></li><li><a href="../../documentation.menu.html">Documentation</a></li><li><a href="../../help.menu.html">Help</a></li><li><a href="../../gallery.html">Gallery</a></li><li><a href="../../newsletter/index.html">News</a></li><li><a href="../../citing.html">Citing</a></li></ul><a href="#moose-search" class="modal-trigger"><i class="material-icons">search</i></a></div></nav><div class="moose-mega-menu-content" id="c977c99b-ce68-4709-9ce1-f4f287d2c7a3"><div class="moose-mega-menu-wrapper"><div class="row row"><div class="col s12 m6 l4"><h2><a href="../../getting_started/installation/index.html">Install MOOSE <i class="material-icons moose-inline-icon">link</i></a></h2><ul class="browser-default"><li><p><a href="../../getting_started/installation/conda.html">Linux and MacOS</a> </p></li><li><p><a href="../../getting_started/installation/windows10.html">Windows 10</a> </p></li><li><p><a href="../../getting_started/installation/docker.html">Docker</a> </p></li><li><p><a href="../../getting_started/installation/index.html#update">Update MOOSE</a></p></li></ul></div><div class="col s12 m6 l4"><h2><a href="../../getting_started/new_users.html">New Users <i class="material-icons moose-inline-icon">link</i></a></h2><ul class="browser-default"><li><p><a href="../../getting_started/new_users.html#create-an-app">Create an Application</a> </p></li><li><p><a href="../../getting_started/new_users.html#helpful-software">Helpful Software</a> </p></li><li><p><a href="../../getting_started/new_users.html#join">Join the Community</a> </p></li><li><p><a href="../../getting_started/new_users.html#configure">Customizing MOOSE Configuration</a></p></li></ul></div><div class="col s12 m6 l4"><h2><a href="../../getting_started/examples_and_tutorials/index.html">Examples and Tutorials <i class="material-icons moose-inline-icon">link</i></a></h2><ul class="browser-default"><li><p><a href="../../getting_started/examples_and_tutorials/tutorial01_app_development/index.html">Tutorial 1: Application Development</a> </p></li><li><p><a href="https://www.mooseframework.org/workshop">Workshop Slides</a> </p></li><li><p><a href="https://www.youtube.com/watch?v=2tJwBsYaLaI">Workshop Video</a></p></li></ul></div><p></p></div></div></div><div class="moose-mega-menu-content" id="660fc7a4-8d1d-4c3a-8dcc-45802f6aa4ed"><div class="moose-mega-menu-wrapper"><div class="row row"><div class="col s12 m6 l4"><h2><a href="../../application_usage/index.html">Application Usage <i class="material-icons moose-inline-icon">link</i></a></h2><ul class="browser-default"><li><p><a href="../../application_usage/command_line_usage.html">Command-line Options</a> </p></li><li><p><a href="../../application_usage/peacock.html">Peacock</a> </p></li><li><p><a href="../../application_usage/failed_solves.html">Troubleshooting Solves</a></p></li></ul><h2>Physics and Syntax</h2><ul class="browser-default"><li><p><a href="../../modules/index.html">Physics Modules</a> </p></li><li><p><a href="../../syntax/index.html">Syntax</a> </p></li><li><p><a href="../../publications.html">List of Publications</a> </p></li><li><p><a href="https://www.mooseframework.org/old/wiki">Old Wiki(deprecated)</a></p></li></ul></div><div class="col s12 m6 l4"><h2><a href="../../application_development/index.html">Application Development <i class="material-icons moose-inline-icon">link</i></a></h2><ul class="browser-default"><li><p><a href="../index.html">Source Pages</a> </p></li><li><p><a href="../../application_development/jacobian_definition.html">Jacobian Definition</a> </p></li><li><p><a href="../../application_development/hypre.html">Hypre/BoomerAMG Preconditioning</a> </p></li><li><p><a href="../../framework_development/utils/index.html">C++ Utilities</a> </p></li><li><p><a href="http://mooseframework.org/docs/doxygen/modules/classes.html">Modules Doxygen</a></p></li></ul><h2><a href="../../framework_development/index.html">Framework Development <i class="material-icons moose-inline-icon">link</i></a></h2><ul class="browser-default"><li><p><a href="../../framework_development/contributing.html">Contributing</a> </p></li><li><p><a href="../../framework_development/code_standards.html">Code Standards</a> </p></li><li><p><a href="https://mooseframework.org/docs/doxygen/moose/classes.html">MOOSE Doxygen</a> </p></li><li><p><a href="https://mooseframework.org/docs/doxygen/libmesh/classes.html">libMesh Doxygen</a> </p></li><li><p><a href="https://mooseframework.org/docs/doxygen/timpi/classes.html">TIMPI Doxygen</a></p></li></ul></div><div class="col s12 m6 l4"><h2><a href="../../python/MooseDocs/index.html">MOOSEDocs <i class="material-icons moose-inline-icon">link</i></a></h2><ul class="browser-default"><li><p><a href="../../python/MooseDocs/specification.html">MOOSE Markdown Specification (MooseDown)</a> </p></li><li><p><a href="../../python/MooseDocs/generate.html">Documenting MOOSE</a> </p></li><li><p><a href="../../sqa/index.html">Software Quality</a></p></li></ul><h2>Infrastructure</h2><ul class="browser-default"><li><p><a href="../../python/index.html">Python</a> </p></li><li><p><a href="../../application_development/build_system.html">Build System</a> </p></li><li><p><a href="../../application_development/test_system.html">Test System</a> </p></li><li><p><a href="../../application_development/performance_benchmarking.html">Benchmarking</a> </p></li><li><p><a href="https://mooseframework.org/docs/timing/">Test Timing</a></p></li></ul><p></p></div></div></div></div><div class="moose-mega-menu-content" id="737f5857-aab5-40f3-8e38-c529119d16c9"><div class="moose-mega-menu-wrapper"><div class="row row"><div class="col s12 m4 l4"><h2>Questions</h2><ul class="browser-default"><li><p><a href="https://github.com/idaholab/moose/discussions">Q&amp;A discussion forum</a> </p></li><li><p><a href="../../help/faq/index.html">Frequently Asked Questions</a> </p></li><li><p><a href="../../help/contact_us.html">Contact Us</a></p></li></ul><p></p></div><div class="col s12 m4 l4"><h2>Information and Tools</h2><ul class="browser-default"><li><p><a href="../../help/a-to-z.html">A to Z Index</a> </p></li><li><p><a href="../../framework_development/git.html">Git</a> </p></li><li><p><a href="../../help/development/index.html">Developer Tools</a> </p></li><li><p><a href="../../help/finite_element_concepts/index.html">Finite Element Concepts</a> </p></li><li><p><a href="../../help/c++/index.html">C++ Fundamentals</a></p></li></ul></div><div class="col s12 m4 l4"><h2><a href="../../help/inl/index.html">INL Applications and Remote Access <i class="material-icons moose-inline-icon">link</i></a></h2><ul class="browser-default"><li><p><a href="../../help/inl/applications.html">INL Applications</a> </p></li><li><p><a href="../../help/inl/hpc_binary.html">INL HPC Binary Access</a> </p></li><li><p><a href="../../help/inl/hpc_remote.html">INL HPC Remote Connectivity</a></p></li></ul></div><p></p></div></div></div><div class="modal modal-fixed-footer moose-search-modal" id="moose-search"><div class="modal-content container moose-search-modal-content"><div class="gcse-search"></div></div><div class="modal-footer"><a href="#!" class="modal-close btn-flat">Close</a></div></div></header><main class="main"><div class="container"><div class="row"><div class="col hide-on-med-and-down l12"><nav class="breadcrumb-nav"><div class="nav-wrapper"><a href=".." class="breadcrumb">source</a><span class="breadcrumb">materials</span><a href="#" class="breadcrumb">FiniteStrainCrystalPlasticity</a></div></nav></div></div><div class="row"><div class="moose-content col s12 m12 l10"><section id="20c2d908-629b-4e43-80b5-81fb8126f10e" data-section-level="1" data-section-text="Finite Strain Crystal Plasticity"><h1 id="finite-strain-crystal-plasticity">Finite Strain Crystal Plasticity</h1><p>Crystal Plasticity base class: FCC system with power law flow rule implemented</p><section class="scrollspy" id="928d6ed9-5157-4aa8-931f-80de95e977e8" data-section-level="2" data-section-text="Description"><h2 id="description">Description</h2><div class="card moose-alert moose-alert-warning"><div class="card-title moose-alert-title"><span class="moose-alert-title-brand">warning</span></div><div class="card-content"><div class="moose-alert-content"><p><p>The <code>FiniteStrainCrystalPlasticity</code> model is maintained but not actively developed. Use of the <a href="FiniteStrainUObasedCP.html">FiniteStrainUObasedCP</a> crystal plasticity system is recommend instead.</p></p></div></div></div><p>Constitutive models are used to calculate the plastic slip rate. In this crystal plasticity material the slip rate is modeled as a power law: <span class="moose-katex-block-equation"><span class="moose-katex-equation table-cell" id="moose-equation-ded9bc46-30aa-42db-8f44-16a919dc0bba"></span><span class="moose-katex-equation-number">(1)</span><script>var element = document.getElementById("moose-equation-ded9bc46-30aa-42db-8f44-16a919dc0bba");katex.render("     \\dot{\\gamma}^{\\alpha} = \\dot{\\gamma}_o \\left| \\frac{\\tau^{\\alpha}}{g^{\\alpha}} \\right|^{1/m} sign \\left( \\tau^{\\alpha} \\right)", element, {displayMode:true,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> where <span class="moose-katex-inline-equation" id="moose-equation-1a50bcbe-ea59-4b4c-bfad-3abccc447dc1"><script>var element = document.getElementById("moose-equation-1a50bcbe-ea59-4b4c-bfad-3abccc447dc1");katex.render("\\dot{\\gamma}_o", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is a reference slip rate, <span class="moose-katex-inline-equation" id="moose-equation-707a95f1-ec75-4273-8949-9a02e6fc17bc"><script>var element = document.getElementById("moose-equation-707a95f1-ec75-4273-8949-9a02e6fc17bc");katex.render("\\tau^{\\alpha}", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is the applied shear stress on each slip system <span class="moose-katex-inline-equation" id="moose-equation-49f54e14-6125-430f-9c64-76402370f4b6"><script>var element = document.getElementById("moose-equation-49f54e14-6125-430f-9c64-76402370f4b6");katex.render("\\alpha", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span>, <span class="moose-katex-inline-equation" id="moose-equation-624253b0-c76f-4117-9c1d-3a4566811091"><script>var element = document.getElementById("moose-equation-624253b0-c76f-4117-9c1d-3a4566811091");katex.render("g^{\\alpha}", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is the slip system strength, or resistance to slip, and <span class="moose-katex-inline-equation" id="moose-equation-cfeb1138-2724-43f3-a980-60bab64c1ede"><script>var element = document.getElementById("moose-equation-cfeb1138-2724-43f3-a980-60bab64c1ede");katex.render("m", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is the strain rate sensitivity exponent. The strength of each slip system is solved with an iterative process as a function of the slip increment <span class="moose-katex-block-equation"><span class="moose-katex-equation table-cell" id="moose-equation-044b890b-e860-443f-aac3-021e247e4fad"></span><span class="moose-katex-equation-number">(2)</span><script>var element = document.getElementById("moose-equation-044b890b-e860-443f-aac3-021e247e4fad");katex.render("     g^{\\alpha} =  g_o + \\Delta \\gamma^{\\alpha} q^{\\alpha \\beta} h _o \\left| 1 - \\frac{g^{\\alpha}}{g_{sat}}  \\right|^a sign \\left( 1 - \\frac{g^{\\alpha}}{g_{sat}} \\right)", element, {displayMode:true,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> where <span class="moose-katex-inline-equation" id="moose-equation-1b3a25cf-5316-4001-9b58-d744684eaf8e"><script>var element = document.getElementById("moose-equation-1b3a25cf-5316-4001-9b58-d744684eaf8e");katex.render("q^{\\alpha \\beta}", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is a hardening coefficient matrix that accounts for the different in self and latent hardening, <a href="#moose-equation-02fbbf0b-d6b1-401d-a8ca-349b19ce6ee1">Eq. (3)</a>, <span class="moose-katex-inline-equation" id="moose-equation-3292524e-024d-4fa8-869c-ecb949bf17b6"><script>var element = document.getElementById("moose-equation-3292524e-024d-4fa8-869c-ecb949bf17b6");katex.render("h_o", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is an initial hardening term, <span class="moose-katex-inline-equation" id="moose-equation-660bd38a-4732-498a-8f5f-c46164962ff4"><script>var element = document.getElementById("moose-equation-660bd38a-4732-498a-8f5f-c46164962ff4");katex.render("g_{sat}", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is a constant saturated hardening value, and <span class="moose-katex-inline-equation" id="moose-equation-5065ed5c-6fdb-4828-9be6-f5c9ebfe74c4"><script>var element = document.getElementById("moose-equation-5065ed5c-6fdb-4828-9be6-f5c9ebfe74c4");katex.render("a", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is the hardening exponent (<a href="#kalidindi1992">Kalidindi et al., 1992</a>). The self and latent hardening of the crystal is defined for an FCC system as <span class="moose-katex-block-equation"><span class="moose-katex-equation table-cell" id="moose-equation-02fbbf0b-d6b1-401d-a8ca-349b19ce6ee1"></span><span class="moose-katex-equation-number">(3)</span><script>var element = document.getElementById("moose-equation-02fbbf0b-d6b1-401d-a8ca-349b19ce6ee1");katex.render("     q^{\\alpha \\beta} = \\begin{Bmatrix}                        1.0 & q   & q   & q  \\\\                        q   & 1.0 & q   & q  \\\\                        q   & q   & 1.0 & q  \\\\                        q   & q   & q   & 1.0                      \\end{Bmatrix}", element, {displayMode:true,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> where <span class="moose-katex-inline-equation" id="moose-equation-4c0f5c73-8834-4221-b870-7e99e03ba1b9"><script>var element = document.getElementById("moose-equation-4c0f5c73-8834-4221-b870-7e99e03ba1b9");katex.render("q", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> is a constant value of latent hardening among non-coplanar slip systems. In <a href="#moose-equation-02fbbf0b-d6b1-401d-a8ca-349b19ce6ee1">Eq. (3)</a> the slip systems which share the same slip plane normal (e.g. <span class="moose-katex-inline-equation" id="moose-equation-ff861a81-cb49-4371-b6fe-74cf631279d4"><script>var element = document.getElementById("moose-equation-ff861a81-cb49-4371-b6fe-74cf631279d4");katex.render("[\\bar{1}11]", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span>) are coplanar and grouped together with a latent hardening rate of unity (<a href="#kalidindi1992">Kalidindi et al., 1992</a>). Each matrix entry in <a href="#moose-equation-02fbbf0b-d6b1-401d-a8ca-349b19ce6ee1">Eq. (3)</a> represents the interaction among two different coplanar slip system groups, that is a total of six slip systems (<a href="#kalidindi1992">Kalidindi et al., 1992</a>).</p><p>In this class, the  crystal strain and stress response with response to the residual calculated by the second Piola-Kirchoff stress increment. In contrast, in <a href="FiniteStrainCPSlipRateRes.html">FiniteStrainCPSlipRateRes</a> the convergence of the crystal plasticity strain and stress response is determined with respect to the slip rate on each slip system of the crystal plasticity model.</p></section><section class="scrollspy" id="2099a676-8b17-45c7-a680-7dce5c02d4a0" data-section-level="2" data-section-text="Units Assumed in the Crystal Plasticity Materials"><h2 id="units-assumed-in-the-crystal-plasticity-materials">Units Assumed in the Crystal Plasticity Materials</h2><p>The simulation domain for crystal plasticity models is resolved on the order of individual crystal grains, and, as such, the mesh size is small. Although MOOSE itself is dimension agnostic, the crystal plasticity models are implemented in the <strong>mm-MPa-s unit system</strong>. This dimension system choice impacts the input files in the following manner:</p><ul class="browser-default"><li><p>Mesh dimensions should be constructed in mm </p></li><li><p>Elastic constant values (e.g. Young&#x27;s modulus and shear modulus) are entered in MPa </p></li><li><p>Initial slip system strength values are entered in MPa </p></li><li><p>Simulation times are given in s </p></li><li><p>Strain rates and displacement loading rates are given in 1/s and mm/s, respectively</p></li></ul><p>In physically based models, which maybe based on this class, initial densities of crystal defects (e.g. dislocations, point defects) should be given in 1/mm<span class="moose-katex-inline-equation" id="moose-equation-ac66dbfd-3e54-414a-b98a-341f27d1c2b2"><script>var element = document.getElementById("moose-equation-ac66dbfd-3e54-414a-b98a-341f27d1c2b2");katex.render("^2", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span> or 1/mm<span class="moose-katex-inline-equation" id="moose-equation-d8cf2fc4-47c4-4d0c-b620-5874a5b3a004"><script>var element = document.getElementById("moose-equation-d8cf2fc4-47c4-4d0c-b620-5874a5b3a004");katex.render("^3", element, {displayMode:false,throwOnError:false,macros:{"\\pf":"\\frac{\\partial #1}{\\partial #2}"}});</script></span></p></section><section class="scrollspy" id="6a998ee8-fda9-492c-ab86-eb355eb15445" data-section-level="2" data-section-text="Input Parameters"><h2 id="input-parameters">Input Parameters</h2><section id="52ee5cb3-ca9a-4f90-a1dc-214454f524c5" data-section-level="3" data-section-text="Required Parameters" data-details-open="open"><details class="moose-section-content" open="open"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">nss</span><span class="moose-parameter-header-description">Number of slip systems</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Number of slip systems</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">slip_sys_file_name</span><span class="moose-parameter-header-description">Name of the file containing the slip system</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>FileName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Name of the file containing the slip system</p></div></li></ul><summary><h3 data-details-open="open"><span class="moose-section-icon"></span>Required Parameters</h3></summary></details></section><section id="b8b7f4d9-c0c4-4be3-b099-0aed95ea64f7" data-section-level="3" data-section-text="Optional Parameters" data-details-open="open"><details class="moose-section-content" open="open"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">abs_tol</span><span class="moose-parameter-header-default">1e-06</span><span class="moose-parameter-header-description">Constitutive stress residue absolute tolerance</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>1e-06</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>double</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Constitutive stress residue absolute tolerance</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">base_name</span><span class="moose-parameter-header-description">Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::string</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">block</span><span class="moose-parameter-header-description">The list of block ids (SubdomainID) that this object will be applied</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector&lt;SubdomainName&gt;</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The list of block ids (SubdomainID) that this object will be applied</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">boundary</span><span class="moose-parameter-header-description">The list of boundary IDs from the mesh where this boundary condition applies</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector&lt;BoundaryName&gt;</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The list of boundary IDs from the mesh where this boundary condition applies</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">compute</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">When false, MOOSE will not call compute methods on this material. The user must call computeProperties() after retrieving the MaterialBase via MaterialBasePropertyInterface::getMaterialBase(). Non-computed MaterialBases are not sorted for dependencies.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>When false, MOOSE will not call compute methods on this material. The user must call computeProperties() after retrieving the MaterialBase via MaterialBasePropertyInterface::getMaterialBase(). Non-computed MaterialBases are not sorted for dependencies.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">constant_on</span><span class="moose-parameter-header-default">NONE</span><span class="moose-parameter-header-description">When ELEMENT, MOOSE will only call computeQpProperties() for the 0th quadrature point, and then copy that value to the other qps.When SUBDOMAIN, MOOSE will only call computeQpProperties() for the 0th quadrature point, and then copy that value to the other qps. Evaluations on element qps will be skipped</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>NONE</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>MooseEnum</p><p class="moose-parameter-description-options"><span>Options:</span>NONE ELEMENT SUBDOMAIN</p><p class="moose-parameter-description"><span>Description:</span>When ELEMENT, MOOSE will only call computeQpProperties() for the 0th quadrature point, and then copy that value to the other qps.When SUBDOMAIN, MOOSE will only call computeQpProperties() for the 0th quadrature point, and then copy that value to the other qps. Evaluations on element qps will be skipped</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">flowprops</span><span class="moose-parameter-header-description">Parameters used in slip rate equations</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector&lt;double&gt;</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Parameters used in slip rate equations</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">gen_random_stress_flag</span><span class="moose-parameter-header-default">False</span><span class="moose-parameter-header-description">Flag to generate random stress to perform time cutback on constitutive failure</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>False</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Flag to generate random stress to perform time cutback on constitutive failure</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">gprops</span><span class="moose-parameter-header-description">Initial values of slip system resistances</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector&lt;double&gt;</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Initial values of slip system resistances</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">gtol</span><span class="moose-parameter-header-default">100</span><span class="moose-parameter-header-description">Constitutive slip system resistance residual tolerance</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>100</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>double</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Constitutive slip system resistance residual tolerance</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">hprops</span><span class="moose-parameter-header-description">Hardening properties</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector&lt;double&gt;</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Hardening properties</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">input_random_scaling_var</span><span class="moose-parameter-header-default">False</span><span class="moose-parameter-header-description">Flag to input scaling variable: _Cijkl(0,0,0,0) when false</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>False</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Flag to input scaling variable: _Cijkl(0,0,0,0) when false</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">intvar_read_type</span><span class="moose-parameter-header-default">none</span><span class="moose-parameter-header-description">Read from options for initial value of internal variables: Default from .i file</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>none</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>MooseEnum</p><p class="moose-parameter-description-options"><span>Options:</span>slip_sys_file slip_sys_res_file none</p><p class="moose-parameter-description"><span>Description:</span>Read from options for initial value of internal variables: Default from .i file</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">line_search_maxiter</span><span class="moose-parameter-header-default">20</span><span class="moose-parameter-header-description">Line search bisection method maximum number of iteration</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>20</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>unsigned int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Line search bisection method maximum number of iteration</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">line_search_method</span><span class="moose-parameter-header-default">CUT_HALF</span><span class="moose-parameter-header-description">The method used in line search</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>CUT_HALF</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>MooseEnum</p><p class="moose-parameter-description-options"><span>Options:</span>CUT_HALF BISECTION</p><p class="moose-parameter-description"><span>Description:</span>The method used in line search</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">line_search_tol</span><span class="moose-parameter-header-default">0.5</span><span class="moose-parameter-header-description">Line search bisection method tolerance</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>0.5</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>double</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Line search bisection method tolerance</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">maximum_substep_iteration</span><span class="moose-parameter-header-default">1</span><span class="moose-parameter-header-description">Maximum number of substep iteration</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>1</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>unsigned int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Maximum number of substep iteration</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">maxiter</span><span class="moose-parameter-header-default">100</span><span class="moose-parameter-header-description">Maximum number of iterations for stress update</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>100</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>unsigned int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Maximum number of iterations for stress update</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">maxitergss</span><span class="moose-parameter-header-default">100</span><span class="moose-parameter-header-description">Maximum number of iterations for slip system resistance update</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>100</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>unsigned int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Maximum number of iterations for slip system resistance update</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">min_line_search_step_size</span><span class="moose-parameter-header-default">0.01</span><span class="moose-parameter-header-description">Minimum line search step size</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>0.01</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>double</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Minimum line search step size</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">num_slip_sys_flowrate_props</span><span class="moose-parameter-header-default">2</span><span class="moose-parameter-header-description">Number of flow rate properties for a slip system</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>2</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>unsigned int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Number of flow rate properties for a slip system</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">num_slip_sys_props</span><span class="moose-parameter-header-default">0</span><span class="moose-parameter-header-description">Number of slip system specific properties provided in the file containing slip system normals and directions</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>0</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>unsigned int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Number of slip system specific properties provided in the file containing slip system normals and directions</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">random_scaling_var</span><span class="moose-parameter-header-default">1e+09</span><span class="moose-parameter-header-description">Random scaling variable: Large value can cause non-positive definiteness</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>1e+09</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>double</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Random scaling variable: Large value can cause non-positive definiteness</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">random_seed</span><span class="moose-parameter-header-default">2000</span><span class="moose-parameter-header-description">Random integer used to generate random stress when constitutive failure occurs</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>2000</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>unsigned int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Random integer used to generate random stress when constitutive failure occurs</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">read_prop_user_object</span><span class="moose-parameter-header-description">The ElementReadPropertyFile GeneralUserObject to read element specific property values from file</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>UserObjectName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The ElementReadPropertyFile GeneralUserObject to read element specific property values from file</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">rtol</span><span class="moose-parameter-header-default">1e-06</span><span class="moose-parameter-header-description">Constitutive stress residue relative tolerance</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>1e-06</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>double</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Constitutive stress residue relative tolerance</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">slip_incr_tol</span><span class="moose-parameter-header-default">0.02</span><span class="moose-parameter-header-description">Maximum allowable slip in an increment</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>0.02</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>double</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Maximum allowable slip in an increment</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">slip_sys_flow_prop_file_name</span><span class="moose-parameter-header-description">Name of the file containing the values of slip rate equation parameters</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>FileName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Name of the file containing the values of slip rate equation parameters</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">slip_sys_hard_prop_file_name</span><span class="moose-parameter-header-description">Name of the file containing the values of hardness evolution parameters</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>FileName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Name of the file containing the values of hardness evolution parameters</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">slip_sys_res_prop_file_name</span><span class="moose-parameter-header-description">Name of the file containing the initial values of slip system resistances</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>FileName</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Name of the file containing the initial values of slip system resistances</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">tan_mod_type</span><span class="moose-parameter-header-default">none</span><span class="moose-parameter-header-description">Type of tangent moduli for preconditioner: default elastic</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>none</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>MooseEnum</p><p class="moose-parameter-description-options"><span>Options:</span>exact none</p><p class="moose-parameter-description"><span>Description:</span>Type of tangent moduli for preconditioner: default elastic</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">use_line_search</span><span class="moose-parameter-header-default">False</span><span class="moose-parameter-header-description">Use line search in constitutive update</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>False</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Use line search in constitutive update</p></div></li></ul><summary><h3 data-details-open="open"><span class="moose-section-icon"></span>Optional Parameters</h3></summary></details></section><section id="b5e689a5-35cb-4b4b-9578-0c4f198df96d" data-section-level="3" data-section-text="Advanced Parameters" data-details-open="close"><details class="moose-section-content"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">control_tags</span><span class="moose-parameter-header-description">Adds user-defined labels for accessing object parameters via control logic.</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector&lt;std::string&gt;</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Adds user-defined labels for accessing object parameters via control logic.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">enable</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Set the enabled status of the MooseObject.</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Set the enabled status of the MooseObject.</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">implicit</span><span class="moose-parameter-header-default">True</span><span class="moose-parameter-header-description">Determines whether this object is calculated using an implicit or explicit form</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>True</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>bool</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Determines whether this object is calculated using an implicit or explicit form</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">seed</span><span class="moose-parameter-header-default">0</span><span class="moose-parameter-header-description">The seed for the master random number generator</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>0</p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>unsigned int</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>The seed for the master random number generator</p></div></li></ul><summary><h3 data-details-open="close"><span class="moose-section-icon"></span>Advanced Parameters</h3></summary></details></section><section id="247861c6-d945-482f-8258-f0190595e081" data-section-level="3" data-section-text="Outputs Parameters" data-details-open="close"><details class="moose-section-content"><ul class="collapsible" data-collapsible="expandable"><li><div class="collapsible-header"><span class="moose-parameter-name">output_properties</span><span class="moose-parameter-header-description">List of material properties, from this material, to output (outputs must also be defined to an output type)</span></div><div class="collapsible-body"><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector&lt;std::string&gt;</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>List of material properties, from this material, to output (outputs must also be defined to an output type)</p></div></li><li><div class="collapsible-header"><span class="moose-parameter-name">outputs</span><span class="moose-parameter-header-default">none </span><span class="moose-parameter-header-description">Vector of output names were you would like to restrict the output of variables(s) associated with this object</span></div><div class="collapsible-body"><p class="moose-parameter-description-default"><span>Default:</span>none </p><p class="moose-parameter-description-cpptype"><span>C++ Type:</span>std::vector&lt;OutputName&gt;</p><p class="moose-parameter-description-options"><span>Options:</span></p><p class="moose-parameter-description"><span>Description:</span>Vector of output names were you would like to restrict the output of variables(s) associated with this object</p></div></li></ul><summary><h3 data-details-open="close"><span class="moose-section-icon"></span>Outputs Parameters</h3></summary></details></section></section><section class="scrollspy" id="ad30bf6f-10ae-413a-b9f1-0a19f3371f37" data-section-level="2" data-section-text="Input Files"><h2 id="input-files">Input Files</h2><ul class="moose-list-inputs browser-default"><li><a href="#835e1378-b3b2-4ae6-a8a0-a981b30004b8" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/crysp.i</a></li><li><a href="#d79b214a-a992-47ad-8e1f-66cdb3f79f2c" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_substep.i</a></li><li><a href="#1ba13222-ebfc-485d-9a44-48e90f7a6ecd" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/orthotropic_rotation_Cijkl.i</a></li><li><a href="#01b7f7e9-9e78-42d2-821b-8544afe439db" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_user_object.i</a></li><li><a href="#70dedeb5-1c6f-4721-965f-0cdb13a9012c" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_read_slip_prop.i</a></li><li><a href="#89684294-dbfc-4c3c-8d19-05774f8210e0" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_linesearch.i</a></li><li><a href="#09c205e8-1c69-42e3-92dc-d6294c37e280" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_fileread.i</a></li><li><a href="#f5aec9d5-558c-4658-ae3a-5674d8c01cc3" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_save_euler.i</a></li><li><a href="#57401ca5-10ac-4768-88b5-140f5c8e54c5" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_cutback.i</a></li><li><a href="#f8acc5dd-923f-4a45-86cd-4b21882d2457" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/karthik-eg-1.i</a></li><li><a href="#3d940706-9cd5-48a4-ae9d-88b510849c56" class="modal-trigger">modules/tensor_mechanics/test/tests/crystal_plasticity/rot-eg1.i</a></li></ul><div class="modal moose-modal" id="835e1378-b3b2-4ae6-a8a0-a981b30004b8"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/crysp.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  elem_type = HEX8
+  displacements = &#x27;ux uy uz&#x27;
+[]
+
+[Variables]
+  [./ux]
+    block = 0
+  [../]
+  [./uy]
+    block = 0
+  [../]
+  [./uz]
+    block = 0
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./rotout]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./gss1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = &#x27;ux uy uz&#x27;
+    use_displaced_mesh = true
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    variable = stress_zz
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./fp_zz]
+    type = RankTwoAux
+    variable = fp_zz
+    rank_two_tensor = fp
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./e_zz]
+    type = RankTwoAux
+    variable = e_zz
+    rank_two_tensor = lage
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./gss1]
+    type = MaterialStdVectorAux
+    variable = gss1
+    property = gss
+    index = 0
+    execute_on = timestep_end
+    block = 0
+  [../]
+[]
+
+[BCs]
+  [./symmy]
+    type = DirichletBC
+    variable = uy
+    boundary = bottom
+    value = 0
+  [../]
+  [./symmx]
+    type = DirichletBC
+    variable = ux
+    boundary = left
+    value = 0
+  [../]
+  [./symmz]
+    type = DirichletBC
+    variable = uz
+    boundary = back
+    value = 0
+  [../]
+  [./tdisp]
+    type = FunctionDirichletBC
+    variable = uz
+    boundary = front
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys.txt
+    nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = &#x27;1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1&#x27;
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    gprops = &#x27;1 4 60.8 5 8 60.8 9 12 60.8&#x27;
+    tan_mod_type = exact
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = &#x27;ux uy uz&#x27;
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./fp_zz]
+    type = ElementAverageValue
+    variable = fp_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./e_zz]
+    type = ElementAverageValue
+    variable = e_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./gss1]
+    type = ElementAverageValue
+    variable = gss1
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = &#x27;-pc_type&#x27;
+  petsc_options_value = &#x27;lu&#x27;
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+
+  dt = 0.05
+  dtmax = 10.0
+  dtmin = 0.05
+
+  num_steps = 10
+[]
+
+[Outputs]
+  file_base = out
+  exodus = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="d79b214a-a992-47ad-8e1f-66cdb3f79f2c"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_substep.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  elem_type = HEX8
+  displacements = &#x27;ux uy uz&#x27;
+[]
+
+[Variables]
+  [./ux]
+    block = 0
+  [../]
+  [./uy]
+    block = 0
+  [../]
+  [./uz]
+    block = 0
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./rotout]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./gss1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = &#x27;ux uy uz&#x27;
+    use_displaced_mesh = true
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    variable = stress_zz
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./fp_zz]
+    type = RankTwoAux
+    variable = fp_zz
+    rank_two_tensor = fp
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./e_zz]
+    type = RankTwoAux
+    variable = e_zz
+    rank_two_tensor = lage
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./gss1]
+    type = MaterialStdVectorAux
+    variable = gss1
+    property = gss
+    index = 0
+    execute_on = timestep_end
+    block = 0
+  [../]
+[]
+
+[BCs]
+  [./symmy]
+    type = DirichletBC
+    variable = uy
+    boundary = bottom
+    value = 0
+  [../]
+  [./symmx]
+    type = DirichletBC
+    variable = ux
+    boundary = left
+    value = 0
+  [../]
+  [./symmz]
+    type = DirichletBC
+    variable = uz
+    boundary = back
+    value = 0
+  [../]
+  [./tdisp]
+    type = FunctionDirichletBC
+    variable = uz
+    boundary = front
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys.txt
+    nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = &#x27;1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1&#x27;
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    gprops = &#x27;1 4 60.8 5 8 60.8 9 12 60.8&#x27;
+    tan_mod_type = exact
+    gen_random_stress_flag = false
+    maximum_substep_iteration = 2
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = &#x27;ux uy uz&#x27;
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./fp_zz]
+    type = ElementAverageValue
+    variable = fp_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./e_zz]
+    type = ElementAverageValue
+    variable = e_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./gss1]
+    type = ElementAverageValue
+    variable = gss1
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = &#x27;-pc_type&#x27;
+  petsc_options_value = &#x27;lu&#x27;
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+
+  dt = 0.5
+  dtmax = 10.0
+  dtmin = 0.5
+
+  num_steps = 3
+[]
+
+[Outputs]
+  file_base = crysp_substep_out
+  exodus = true
+  csv = true
+  gnuplot = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="1ba13222-ebfc-485d-9a44-48e90f7a6ecd"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/orthotropic_rotation_Cijkl.i</h4><pre class="moose-pre"><code class="language-text"># This test is designed to test the correct application of the Euler angle
+# rotations to the elasticity tensor. The test uses values for the nine C_ijkl
+# entries that correspond to the engineering notation placement:
+#  e.g. C11 = 11e3, c12 = 12e3, c13 = 13e3, c22 = 22e3 ..... c66 = 66e3
+#
+# A rotation of (0, 90, 0) is applied to the 1x1x1 cube, such that the values of
+# c12 and c13 switch, c22 and c33 switch, and c55 and c66 switch. Postprocessors
+# are used to verify this switch (made simple with the value convention above)
+# and to verify that the unrotated components along the x-axis remain constant.
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 3
+[]
+
+[GlobalParams]
+  displacements = &#x27;disp_x disp_y disp_z&#x27;
+[]
+
+[AuxVariables]
+  [./lage_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./lage_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pk2_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./lage_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./fp_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c12]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c13]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c23]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c44]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c55]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./c66]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+  [../]
+[]
+
+[AuxKernels]
+  [./lage_xx]
+    type = RankTwoAux
+    rank_two_tensor = lage
+    variable = lage_xx
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
+  [../]
+  [./lage_yy]
+    type = RankTwoAux
+    rank_two_tensor = lage
+    variable = lage_yy
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
+  [../]
+  [./pk2_yy]
+    type = RankTwoAux
+    variable = pk2_yy
+    rank_two_tensor = pk2
+    index_j = 1
+    index_i = 1
+    execute_on = timestep_end
+  [../]
+  [./lage_zz]
+    type = RankTwoAux
+    rank_two_tensor = lage
+    variable = lage_zz
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
+  [../]
+  [./fp_yy]
+    type = RankTwoAux
+    variable = fp_yy
+    rank_two_tensor = fp
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
+  [../]
+  [./c11]
+    type = RankFourAux
+    variable = c11
+    rank_four_tensor = elasticity_tensor
+    index_i = 0
+    index_j = 0
+    index_k = 0
+    index_l = 0
+    execute_on = timestep_end
+  [../]
+  [./c12]
+    type = RankFourAux
+    variable = c12
+    rank_four_tensor = elasticity_tensor
+    index_i = 0
+    index_j = 0
+    index_k = 1
+    index_l = 1
+    execute_on = timestep_end
+  [../]
+  [./c13]
+    type = RankFourAux
+    variable = c13
+    rank_four_tensor = elasticity_tensor
+    index_i = 0
+    index_j = 0
+    index_k = 2
+    index_l = 2
+    execute_on = timestep_end
+  [../]
+  [./c22]
+    type = RankFourAux
+    variable = c22
+    rank_four_tensor = elasticity_tensor
+    index_i = 1
+    index_j = 1
+    index_k = 1
+    index_l = 1
+    execute_on = timestep_end
+  [../]
+  [./c23]
+    type = RankFourAux
+    variable = c23
+    rank_four_tensor = elasticity_tensor
+    index_i = 1
+    index_j = 1
+    index_k = 2
+    index_l = 2
+    execute_on = timestep_end
+  [../]
+  [./c33]
+    type = RankFourAux
+    variable = c33
+    rank_four_tensor = elasticity_tensor
+    index_i = 2
+    index_j = 2
+    index_k = 2
+    index_l = 2
+    execute_on = timestep_end
+  [../]
+  [./c44]
+    type = RankFourAux
+    variable = c44
+    rank_four_tensor = elasticity_tensor
+    index_i = 1
+    index_j = 2
+    index_k = 1
+    index_l = 2
+    execute_on = timestep_end
+  [../]
+  [./c55]
+    type = RankFourAux
+    variable = c55
+    rank_four_tensor = elasticity_tensor
+    index_i = 2
+    index_j = 0
+    index_k = 2
+    index_l = 0
+    execute_on = timestep_end
+  [../]
+  [./c66]
+    type = RankFourAux
+    variable = c66
+    rank_four_tensor = elasticity_tensor
+    index_i = 0
+    index_j = 1
+    index_k = 0
+    index_l = 1
+    execute_on = timestep_end
+  [../]
+[]
+
+[BCs]
+  [./bottom]
+    type = DirichletBC
+    variable = disp_y
+    boundary = bottom
+    value = 0
+  [../]
+  [./left]
+    type = DirichletBC
+    variable = disp_x
+    boundary = left
+    value = 0
+  [../]
+  [./back]
+    type = DirichletBC
+    variable = disp_z
+    boundary = back
+    value = 0
+  [../]
+  [./top]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = top
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys.txt
+    nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = &#x27;1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1&#x27;
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    gprops = &#x27;1 4 60.8e3 5 8 60.8e3 9 12 60.8e3&#x27;
+    tan_mod_type = exact
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    C_ijkl = &#x27;11e3 12e3 13e3 22e3 23e3 33e3 44e3 55e3 66e3&#x27;
+    fill_method = symmetric9
+    euler_angle_1 = 0.0
+    euler_angle_2 = 90.0
+    euler_angle_3 = 0.0
+  [../]
+[]
+
+[Postprocessors]
+  [./lage_xx]
+    type = ElementAverageValue
+    variable = lage_xx
+  [../]
+  [./pk2_yy]
+    type = ElementAverageValue
+    variable = pk2_yy
+  [../]
+  [./lage_yy]
+    type = ElementAverageValue
+    variable = lage_yy
+  [../]
+  [./lage_zz]
+    type = ElementAverageValue
+    variable = lage_zz
+  [../]
+  [./fp_yy]
+    type = ElementAverageValue
+    variable = fp_yy
+  [../]
+  [./c11]
+    type = ElementAverageValue
+    variable = c11
+  [../]
+  [./c12]
+    type = ElementAverageValue
+    variable = c12
+  [../]
+  [./c13]
+    type = ElementAverageValue
+    variable = c13
+  [../]
+  [./c22]
+    type = ElementAverageValue
+    variable = c22
+  [../]
+  [./c23]
+    type = ElementAverageValue
+    variable = c23
+  [../]
+  [./c33]
+    type = ElementAverageValue
+    variable = c33
+  [../]
+  [./c44]
+    type = ElementAverageValue
+    variable = c44
+  [../]
+  [./c55]
+    type = ElementAverageValue
+    variable = c55
+  [../]
+  [./c66]
+    type = ElementAverageValue
+    variable = c66
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = PJFNK
+
+  l_tol = 1e-3
+  petsc_options_iname = &#x27;-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart&#x27;
+  petsc_options_value = &#x27; asm      1              lu            gmres     200&#x27;
+  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-10
+
+  dtmax = 0.1
+  dtmin = 1.0e-3
+  dt = 0.05
+  end_time = 0.5
+[]
+
+[Outputs]
+  exodus = false
+  csv = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="01b7f7e9-9e78-42d2-821b-8544afe439db"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_user_object.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  elem_type = QUAD4
+  displacements = &#x27;disp_x disp_y&#x27;
+  nx = 2
+  ny = 2
+[]
+
+[Variables]
+  [./disp_x]
+    block = 0
+  [../]
+  [./disp_y]
+    block = 0
+  [../]
+[]
+
+[GlobalParams]
+  volumetric_locking_correction=true
+[]
+
+[AuxVariables]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_yy]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_yy]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./rotout]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./gss1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[UserObjects]
+  [./prop_read]
+    type = ElementPropertyReadFile
+    prop_file_name = &#x27;euler_ang_file.txt&#x27;
+    # Enter file data as prop#1, prop#2, .., prop#nprop
+    nprop = 3
+    read_type = element
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_yy]
+    type = RankTwoAux
+    variable = stress_yy
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 1
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./e_yy]
+    type = RankTwoAux
+    variable = e_yy
+    rank_two_tensor = lage
+    index_j = 1
+    index_i = 1
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./fp_yy]
+    type = RankTwoAux
+    variable = fp_yy
+    rank_two_tensor = fp
+    index_j = 1
+    index_i = 1
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./gss1]
+    type = MaterialStdVectorAux
+    variable = gss1
+    property = gss
+    index = 0
+    execute_on = timestep_end
+    block = 0
+  [../]
+[]
+
+[BCs]
+  [./fix_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = &#x27;left&#x27;
+    value = 0
+  [../]
+  [./fix_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = &#x27;bottom&#x27;
+    value = 0
+  [../]
+  [./tdisp]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = top
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys.txt
+    nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = &#x27;1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1&#x27;
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    gprops = &#x27;1 4 60.8 5 8 60.8 9 12 60.8&#x27;
+    tan_mod_type = exact
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = &#x27;disp_x disp_y&#x27;
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    fill_method = symmetric9
+    read_prop_user_object = prop_read
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_yy]
+    type = ElementAverageValue
+    variable = stress_yy
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./e_yy]
+    type = ElementAverageValue
+    variable = e_yy
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./fp_yy]
+    type = ElementAverageValue
+    variable = fp_yy
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./gss1]
+    type = ElementAverageValue
+    variable = gss1
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = &#x27;-pc_type&#x27;
+  petsc_options_value = &#x27;lu&#x27;
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+
+  dt = 0.01
+  dtmax = 10.0
+  dtmin = 0.01
+
+  num_steps = 10
+[]
+
+[Outputs]
+  file_base = crysp_user_object_out
+  exodus = true
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = &#x27;disp_x disp_y&#x27;
+    use_displaced_mesh = true
+  [../]
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="70dedeb5-1c6f-4721-965f-0cdb13a9012c"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_read_slip_prop.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  elem_type = HEX8
+  displacements = &#x27;ux uy uz&#x27;
+[]
+
+[Variables]
+  [./ux]
+    block = 0
+  [../]
+  [./uy]
+    block = 0
+  [../]
+  [./uz]
+    block = 0
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./rotout]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./gss1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = &#x27;ux uy uz&#x27;
+    use_displaced_mesh = true
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    variable = stress_zz
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./fp_zz]
+    type = RankTwoAux
+    variable = fp_zz
+    rank_two_tensor = fp
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./e_zz]
+    type = RankTwoAux
+    variable = e_zz
+    rank_two_tensor = lage
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./gss1]
+    type = MaterialStdVectorAux
+    variable = gss1
+    property = gss
+    index = 0
+    execute_on = timestep_end
+    block = 0
+  [../]
+[]
+
+[BCs]
+  [./symmy]
+    type = DirichletBC
+    variable = uy
+    boundary = bottom
+    value = 0
+  [../]
+  [./symmx]
+    type = DirichletBC
+    variable = ux
+    boundary = left
+    value = 0
+  [../]
+  [./symmz]
+    type = DirichletBC
+    variable = uz
+    boundary = back
+    value = 0
+  [../]
+  [./tdisp]
+    type = FunctionDirichletBC
+    variable = uz
+    boundary = front
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys_prop.txt
+    nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = &#x27;1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1&#x27;
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    tan_mod_type = exact
+    intvar_read_type = slip_sys_file
+    num_slip_sys_props = 1
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = &#x27;ux uy uz&#x27;
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./fp_zz]
+    type = ElementAverageValue
+    variable = fp_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./e_zz]
+    type = ElementAverageValue
+    variable = e_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./gss1]
+    type = ElementAverageValue
+    variable = gss1
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = &#x27;-pc_type&#x27;
+  petsc_options_value = &#x27;lu&#x27;
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+
+  dt = 0.05
+  dtmax = 10.0
+  dtmin = 0.05
+
+  num_steps = 10
+[]
+
+[Outputs]
+  file_base = crysp_read_slip_prop_out
+  exodus = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="89684294-dbfc-4c3c-8d19-05774f8210e0"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_linesearch.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  elem_type = HEX8
+  displacements = &#x27;ux uy uz&#x27;
+[]
+
+[Variables]
+  [./ux]
+    block = 0
+  [../]
+  [./uy]
+    block = 0
+  [../]
+  [./uz]
+    block = 0
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./gss1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = &#x27;ux uy uz&#x27;
+    use_displaced_mesh = true
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    variable = stress_zz
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./fp_zz]
+    type = RankTwoAux
+    variable = fp_zz
+    rank_two_tensor = fp
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./e_zz]
+    type = RankTwoAux
+    variable = e_zz
+    rank_two_tensor = lage
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./gss1]
+    type = MaterialStdVectorAux
+    variable = gss1
+    property = gss
+    index = 0
+    execute_on = timestep_end
+    block = 0
+  [../]
+[]
+
+[BCs]
+  [./symmy]
+    type = DirichletBC
+    variable = uy
+    boundary = bottom
+    value = 0
+  [../]
+  [./symmx]
+    type = DirichletBC
+    variable = ux
+    boundary = left
+    value = 0
+  [../]
+  [./symmz]
+    type = DirichletBC
+    variable = uz
+    boundary = back
+    value = 0
+  [../]
+  [./tdisp]
+    type = FunctionDirichletBC
+    variable = uz
+    boundary = front
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    rtol = 1e-6
+    abs_tol = 1e-8
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys.txt
+    nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = &#x27;1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1&#x27;
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    gprops = &#x27;1 4 60.8 5 8 60.8 9 12 60.8&#x27;
+    tan_mod_type = exact
+    use_line_search = true
+    min_line_search_step_size = 0.01
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = &#x27;ux uy uz&#x27;
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./fp_zz]
+    type = ElementAverageValue
+    variable = fp_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./e_zz]
+    type = ElementAverageValue
+    variable = e_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./gss1]
+    type = ElementAverageValue
+    variable = gss1
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = &#x27;-pc_type&#x27;
+  petsc_options_value = &#x27;lu&#x27;
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+
+  dt = 0.025
+  dtmax = 10.0
+  dtmin = 0.02
+
+  num_steps = 10
+[]
+
+[Outputs]
+  file_base = crysp_lsearch_out
+  exodus = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="09c205e8-1c69-42e3-92dc-d6294c37e280"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_fileread.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  nx=1
+  ny=1
+  nz=1
+  xmin=0.0
+  xmax=1.0
+  ymin=0.0
+  ymax=1.0
+  zmin=0.0
+  zmax=1.0
+  elem_type = HEX8
+  displacements = &#x27;disp_x disp_y disp_z&#x27;
+[]
+
+[Variables]
+  [./disp_x]
+    block = 0
+  [../]
+  [./disp_y]
+    block = 0
+  [../]
+  [./disp_z]
+    block = 0
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./rotout]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./gss1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = &#x27;disp_x disp_y disp_z&#x27;
+    use_displaced_mesh = true
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    variable = stress_zz
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./fp_zz]
+    type = RankTwoAux
+    variable = fp_zz
+    rank_two_tensor = fp
+    index_j = 2
+    index_i = 2
+    execute_on = &#x27;initial timestep_end&#x27;
+    block = 0
+  [../]
+  [./e_zz]
+    type = RankTwoAux
+    variable = e_zz
+    rank_two_tensor = lage
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./gss1]
+    type = MaterialStdVectorAux
+    variable = gss1
+    property = gss
+    index = 0
+    execute_on = &#x27;initial timestep_end&#x27;
+    block = 0
+  [../]
+[]
+
+[BCs]
+  [./symmy]
+    type = DirichletBC
+    variable = disp_y
+    boundary = bottom
+    value = 0
+  [../]
+  [./symmx]
+    type = DirichletBC
+    variable = disp_x
+    boundary = left
+    value = 0
+  [../]
+  [./symmz]
+    type = DirichletBC
+    variable = disp_z
+    boundary = back
+    value = 0
+  [../]
+  [./tdisp]
+    type = FunctionDirichletBC
+    variable = disp_z
+    boundary = front
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys.txt
+    slip_sys_res_prop_file_name = input_slip_sys_res.txt
+    slip_sys_flow_prop_file_name = input_slip_sys_flow_prop.txt
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    nss = 12
+    intvar_read_type = slip_sys_res_file
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = &#x27;disp_x disp_y disp_z&#x27;
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+    execute_on = &#x27;initial timestep_end&#x27;
+  [../]
+  [./fp_zz]
+    type = ElementAverageValue
+    variable = fp_zz
+    execute_on = &#x27;initial timestep_end&#x27;
+  [../]
+  [./e_zz]
+    type = ElementAverageValue
+    variable = e_zz
+    execute_on = &#x27;initial timestep_end&#x27;
+  [../]
+  [./gss1]
+    type = ElementAverageValue
+    variable = gss1
+    execute_on = &#x27;initial timestep_end&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = &#x27;-pc_type&#x27;
+  petsc_options_value = &#x27;lu&#x27;
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+
+  dt = 0.05
+  dtmax = 10.0
+  dtmin = 0.05
+
+  num_steps = 10
+[]
+
+[Outputs]
+  file_base = crysp_fileread_out
+  exodus = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="f5aec9d5-558c-4658-ae3a-5674d8c01cc3"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_save_euler.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  elem_type = QUAD4
+  displacements = &#x27;disp_x disp_y&#x27;
+  nx = 2
+  ny = 2
+[]
+
+[Variables]
+  [./disp_x]
+    block = 0
+  [../]
+  [./disp_y]
+    block = 0
+  [../]
+[]
+
+[GlobalParams]
+  volumetric_locking_correction = true
+[]
+
+[AuxVariables]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_yy]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_yy]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./rotout]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./gss1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./euler1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./euler2]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./euler3]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[UserObjects]
+  [./prop_read]
+    type = ElementPropertyReadFile
+    prop_file_name = &#x27;euler_ang_file.txt&#x27;
+    # Enter file data as prop#1, prop#2, .., prop#nprop
+    nprop = 3
+    read_type = element
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_yy]
+    type = RankTwoAux
+    variable = stress_yy
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 1
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./e_yy]
+    type = RankTwoAux
+    variable = e_yy
+    rank_two_tensor = lage
+    index_j = 1
+    index_i = 1
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./fp_yy]
+    type = RankTwoAux
+    variable = fp_yy
+    rank_two_tensor = fp
+    index_j = 1
+    index_i = 1
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./gss1]
+    type = MaterialStdVectorAux
+    variable = gss1
+    property = gss
+    index = 0
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./euler1]
+    type = MaterialRealVectorValueAux
+    variable = euler1
+    property = Euler_angles
+    component = 0
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./euler2]
+    type = MaterialRealVectorValueAux
+    variable = euler2
+    property = Euler_angles
+    component = 1
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./euler3]
+    type = MaterialRealVectorValueAux
+    variable = euler3
+    property = Euler_angles
+    component = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+[]
+
+[BCs]
+  [./fix_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = &#x27;left&#x27;
+    value = 0
+  [../]
+  [./fix_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = &#x27;bottom&#x27;
+    value = 0
+  [../]
+  [./tdisp]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = top
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys.txt
+    nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = &#x27;1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1&#x27;
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    gprops = &#x27;1 4 60.8 5 8 60.8 9 12 60.8&#x27;
+    tan_mod_type = exact
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = &#x27;disp_x disp_y&#x27;
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    fill_method = symmetric9
+    read_prop_user_object = prop_read
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_yy]
+    type = ElementAverageValue
+    variable = stress_yy
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./e_yy]
+    type = ElementAverageValue
+    variable = e_yy
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./fp_yy]
+    type = ElementAverageValue
+    variable = fp_yy
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./gss1]
+    type = ElementAverageValue
+    variable = gss1
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = &#x27;-pc_type&#x27;
+  petsc_options_value = &#x27;lu&#x27;
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+
+  dt = 0.01
+  dtmax = 10.0
+  dtmin = 0.01
+
+  num_steps = 10
+[]
+
+[Outputs]
+  file_base = crysp_save_euler_out
+  exodus = true
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = &#x27;disp_x disp_y&#x27;
+    use_displaced_mesh = true
+  [../]
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="57401ca5-10ac-4768-88b5-140f5c8e54c5"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/crysp_cutback.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  elem_type = HEX8
+  displacements = &#x27;ux uy uz&#x27;
+[]
+
+[Variables]
+  [./ux]
+    block = 0
+  [../]
+  [./uy]
+    block = 0
+  [../]
+  [./uz]
+    block = 0
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./rotout]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./gss1]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./tdisp]
+    type = ParsedFunction
+    value = 0.01*t
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = &#x27;ux uy uz&#x27;
+    use_displaced_mesh = true
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    variable = stress_zz
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./fp_zz]
+    type = RankTwoAux
+    variable = fp_zz
+    rank_two_tensor = fp
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./e_zz]
+    type = RankTwoAux
+    variable = e_zz
+    rank_two_tensor = lage
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./gss1]
+    type = MaterialStdVectorAux
+    variable = gss1
+    property = gss
+    index = 0
+    execute_on = timestep_end
+    block = 0
+  [../]
+[]
+
+[BCs]
+  [./symmy]
+    type = DirichletBC
+    variable = uy
+    boundary = bottom
+    value = 0
+  [../]
+  [./symmx]
+    type = DirichletBC
+    variable = ux
+    boundary = left
+    value = 0
+  [../]
+  [./symmz]
+    type = DirichletBC
+    variable = uz
+    boundary = back
+    value = 0
+  [../]
+  [./tdisp]
+    type = FunctionDirichletBC
+    variable = uz
+    boundary = front
+    function = tdisp
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    gtol = 1e-2
+    slip_sys_file_name = input_slip_sys.txt
+    nss = 12
+    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
+    flowprops = &#x27;1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1&#x27;
+    hprops = &#x27;1.0 541.5 60.8 109.8 2.5&#x27;
+    gprops = &#x27;1 4 60.8 5 8 60.8 9 12 60.8&#x27;
+    tan_mod_type = exact
+    gen_random_stress_flag = true
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = &#x27;ux uy uz&#x27;
+  [../]
+[]
+
+[Postprocessors]
+  [./stress_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./fp_zz]
+    type = ElementAverageValue
+    variable = fp_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./e_zz]
+    type = ElementAverageValue
+    variable = e_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./gss1]
+    type = ElementAverageValue
+    variable = gss1
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = &#x27;-pc_factor_shift_type&#x27;
+  petsc_options_value = &#x27;nonzero&#x27;
+
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+
+  dt = 1.0
+  dtmax = 10.0
+  dtmin = 1e-5
+
+  num_steps = 3
+
+  snesmf_reuse_base = false
+[]
+
+[Outputs]
+  file_base = crysp_cutback_out
+  exodus = true
+  csv = true
+  gnuplot = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="f8acc5dd-923f-4a45-86cd-4b21882d2457"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/karthik-eg-1.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  elem_type = HEX8
+  dim = 3
+  nz = 10
+  xmax = 10
+  ymax = 10
+  zmax = 100
+[]
+
+[Variables]
+  [./x_disp]
+    block = 0
+  [../]
+  [./y_disp]
+    block = 0
+  [../]
+  [./z_disp]
+    block = 0
+  [../]
+[]
+
+[TensorMechanics]
+  [./solid]
+#    disp_x = x_disp
+#    disp_y = y_disp
+#    disp_z = z_disp
+    displacements = &#x27;disp_x disp_y disp_z&#x27;
+  [../]
+[]
+
+[Materials]
+  active = &#x27;fcrysp&#x27;
+  [./felastic]
+    type = FiniteStrainElasticMaterial
+    block = 0
+    fill_method = symmetric9
+    disp_x = x_disp
+    disp_y = y_disp
+    disp_z = z_disp
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+  [../]
+  [./fcrysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    disp_y = y_disp
+    disp_x = x_disp
+    disp_z = z_disp
+    flowprops = &#x27;1 12 0.001 0.1&#x27;
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5&#x27;
+    nss = 12
+    hprops = &#x27;1.0 541.5 60.8 109.8&#x27;
+    gprops = &#x27;1 12 60.8&#x27;
+    fill_method = symmetric9
+    slip_sys_file_name = input_slip_sys.txt
+  [../]
+[]
+
+[Functions]
+  [./topdisp]
+    type = ParsedFunction
+    value = 0.7*t
+  [../]
+  [./tpress]
+    type = ParsedFunction
+    value = -200*t
+  [../]
+[]
+
+[BCs]
+  [./zbc]
+    type = DirichletBC
+    variable = z_disp
+    boundary = back
+    value = 0
+  [../]
+  [./ybc]
+    type = DirichletBC
+    variable = y_disp
+    boundary = bottom
+    value = 0
+  [../]
+  [./xbc]
+    type = DirichletBC
+    variable = x_disp
+    boundary = left
+    value = 0
+  [../]
+  [./zmove]
+    type = FunctionDirichletBC
+    variable = z_disp
+    boundary = front
+    function = topdisp
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./e_zz]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zz
+    index_i = 3
+    index_j = 3
+    execute_on = timestep_end
+    block = 0
+  [../]
+  [./e_zz]
+    type = RankTwoAux
+    rank_two_tensor = lage
+    variable = e_zz
+    index_i = 3
+    index_j = 3
+    execute_on = timestep_end
+    block = 0
+  [../]
+[]
+
+[Postprocessors]
+  [./szz]
+    type = ElementAverageValue
+    variable = stress_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+  [./ezz]
+    type = ElementAverageValue
+    variable = e_zz
+    block = &#x27;ANY_BLOCK_ID 0&#x27;
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  num_steps = 1000
+  end_time = 1
+  dt = 0.02
+  dtmax = 0.02
+  dtmin = 0.02
+  type = Transient
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+  petsc_options_iname = -pc_hypre_type
+  petsc_options_value = boomerang
+  nl_abs_tol = 1e-08
+  nl_rel_step_tol = 1e-08
+  nl_abs_step_tol = 1e-08
+  abort_on_solve_fail = true
+  n_startup_steps = 0.0
+[]
+
+[Outputs]
+  file_base = out
+  exodus = true
+  csv = true
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><div class="modal moose-modal" id="3d940706-9cd5-48a4-ae9d-88b510849c56"><div class="modal-content"><h4>modules/tensor_mechanics/test/tests/crystal_plasticity/rot-eg1.i</h4><pre class="moose-pre"><code class="language-text">#
+# Rotation Test
+#
+# This test is designed to compute a uniaxial stress and then follow that
+# stress as the mesh is rotated 90 degrees.
+#
+# The mesh is composed of one block with a single element.  The nodal
+# displacements in the x and y directions are prescribed.  Poisson&#x27;s
+# ratio is zero.
+#
+
+[Mesh]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 3
+    elem_type = HEX8
+    displacements = &#x27;ux uy uz&#x27;
+  []
+  [./side1n1]
+    input = gen
+    type = ExtraNodesetGenerator
+    coord = &#x27;0.0 0.0 0.0&#x27;
+    boundary = 6
+  [../]
+  [./side1n2]
+    input = side1n1
+    type = ExtraNodesetGenerator
+    coord = &#x27;1.0 0.0 0.0&#x27;
+    boundary = 7
+  [../]
+  [./side2n1]
+    input = side1n2
+    type = ExtraNodesetGenerator
+    coord = &#x27;0.0 1.0 0.0&#x27;
+    boundary = 8
+  [../]
+  [./side2n2]
+    input = side2n1
+    type = ExtraNodesetGenerator
+    coord = &#x27;1.0 1.0 0.0&#x27;
+    boundary = 9
+  [../]
+  [./side3n1]
+    input = side2n2
+    type = ExtraNodesetGenerator
+    coord = &#x27;0.0 1.0 1.0&#x27;
+    boundary = 10
+  [../]
+  [./side3n2]
+    input = side3n1
+    type = ExtraNodesetGenerator
+    coord = &#x27;1.0 1.0 1.0&#x27;
+    boundary = 11
+  [../]
+  [./side4n1]
+    input = side3n2
+    type = ExtraNodesetGenerator
+    coord = &#x27;0.0 0.0 1.0&#x27;
+    boundary = 12
+  [../]
+  [./side4n2]
+    input = side4n1
+    type = ExtraNodesetGenerator
+    coord = &#x27;1.0 0.0 1.0&#x27;
+    boundary = 13
+  [../]
+[]
+
+[Variables]
+  [./ux]
+    block = 0
+  [../]
+  [./uy]
+    block = 0
+  [../]
+  [./uz]
+    block = 0
+  [../]
+[]
+
+[Functions]
+  [./side2uxfunc]
+    type = ParsedFunction
+    value = cos(pi/2*t)-1
+  [../]
+  [./side2uyfunc]
+    type = ParsedFunction
+    value = sin(pi/2*t)
+  [../]
+  [./side3uxfunc]
+    type = ParsedFunction
+    value = cos(pi/2*t)-sin(pi/2*t)-1
+  [../]
+  [./side3uyfunc]
+    type = ParsedFunction
+    value = cos(pi/2*t)+sin(pi/2*t)-1
+  [../]
+  [./side4uxfunc]
+    type = ParsedFunction
+    value = -sin(pi/2*t)
+  [../]
+  [./side4uyfunc]
+    type = ParsedFunction
+    value = cos(pi/2*t)-1
+  [../]
+[]
+
+[BCs]
+  active = &#x27;bcside1 bcside2ux bcside2uy bcside4ux bcside4uy bcside3uy bcside3ux bcx&#x27;
+  [./bcside1]
+    type = DirichletBC
+    variable = &#x27;uy uz&#x27;
+    boundary = &#x27;6 7&#x27;
+    value = 0
+  [../]
+  [./bcside2ux]
+    type = FunctionDirichletBC
+    variable = uy
+    boundary = &#x27;8 9&#x27;
+    function = side2uxfunc
+  [../]
+  [./bcside2uy]
+    type = FunctionDirichletBC
+    variable = uz
+    boundary = &#x27;8 9&#x27;
+    function = side2uyfunc
+  [../]
+  [./bcside3ux]
+    type = FunctionDirichletBC
+    variable = uy
+    boundary = &#x27;10 11&#x27;
+    function = side3uxfunc
+  [../]
+  [./bcside3uy]
+    type = FunctionDirichletBC
+    variable = uz
+    boundary = &#x27;10 11&#x27;
+    function = side3uyfunc
+  [../]
+  [./bcside4ux]
+    type = FunctionDirichletBC
+    variable = uy
+    boundary = &#x27;12 13&#x27;
+    function = side4uxfunc
+  [../]
+  [./bcside4uy]
+    type = FunctionDirichletBC
+    variable = uz
+    boundary = &#x27;12 13&#x27;
+    function = side4uyfunc
+  [../]
+  [./bot]
+    type = DirichletBC
+    variable = &#x27;ux uy uz&#x27;
+    boundary = back
+    value = 0
+  [../]
+  [./topxz]
+    type = DirichletBC
+    variable = &#x27;ux uz&#x27;
+    boundary = front
+    value = 0
+  [../]
+  [./topy]
+    type = DirichletBC
+    variable = uy
+    boundary = front
+    value = 1
+  [../]
+  [./bcx]
+    type = DirichletBC
+    variable = ux
+    boundary = &#x27;6 7 8 9 10 11 12 13&#x27;
+    value = 0
+  [../]
+[]
+
+[Materials]
+  [./crysp]
+    type = FiniteStrainCrystalPlasticity
+    block = 0
+    disp_y = uy
+    disp_x = ux
+    slip_sys_file_name = input_slip_sys.txt
+    disp_z = uz
+    flowprops = &#x27; 1 12 0.001 0.1&#x27;
+    C_ijkl = &#x27;1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 .754e5 .754e5 .754e5&#x27;
+    nss = 12
+    hprops = &#x27;1 541.5 60.8 109.8&#x27;
+    gprops = &#x27;1 12 60.8&#x27;
+    fill_method = symmetric9
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  dt = 0.01
+
+  #Preconditioned JFNK (default)
+  solve_type = &#x27;PJFNK&#x27;
+
+
+
+  petsc_options_iname = -pc_hypre_type
+  petsc_options_value = boomerang
+  dtmax = 0.01
+  end_time = 1
+  dtmin = 0.01
+[]
+
+[Outputs]
+  file_base = rot_eg1
+  solution_history = true
+  [./exodus]
+    type = Exodus
+    use_displaced = true
+  [../]
+[]
+
+[TensorMechanics]
+  [./tensormech]
+    disp_z = uz
+    disp_y = uy
+    disp_x = ux
+  [../]
+[]
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div></section><section class="scrollspy" id="121a2df1-447e-487d-9b08-9b87544aceb5" data-section-level="2" data-section-text="Child Objects"><h2 id="child-objects">Child Objects</h2><ul class="moose-list-children browser-default"><li><a href="#b0f5b7bf-60d7-439c-8eb0-9ebef63dfe5c" class="modal-trigger">modules/tensor_mechanics/include/materials/FiniteStrainCPSlipRateRes.h</a></li></ul><div class="modal moose-modal" id="b0f5b7bf-60d7-439c-8eb0-9ebef63dfe5c"><div class="modal-content"><h4>modules/tensor_mechanics/include/materials/FiniteStrainCPSlipRateRes.h</h4><pre class="moose-pre"><code class="language-cpp">// This file is part of the MOOSE framework
+// https://www.mooseframework.org
+//
+// All rights reserved, see COPYRIGHT for full restrictions
+// https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//
+// Licensed under LGPL 2.1, please see LICENSE for details
+// https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include &quot;FiniteStrainCrystalPlasticity.h&quot;
+
+class FiniteStrainCPSlipRateRes : public FiniteStrainCrystalPlasticity
+{
+public:
+  static InputParameters validParams();
+
+  FiniteStrainCPSlipRateRes(const InputParameters &amp; parameters);
+
+protected:
+  /**
+   * This function solves internal variables.
+   */
+  virtual void solveStatevar();
+
+  /**
+   * This function sets variable for internal variable solve.
+   */
+  virtual void preSolveStress();
+
+  /**
+   * This function solves for stress, updates plastic deformation gradient.
+   */
+  virtual void solveStress();
+
+  /**
+   * This function calculates residual and jacobian of slip rate.
+   */
+  virtual void calcResidJacobSlipRate();
+
+  /**
+   * This function calculates residual of slip rate.
+   */
+  virtual void calcResidualSlipRate();
+
+  /**
+   * This function calculates jacobian of slip rate.
+   */
+  virtual void calcJacobianSlipRate();
+
+  /**
+   * This function updates the slip system resistances.
+   */
+  virtual void getSlipIncrements();
+
+  /**
+   * This function calculates partial derivative of resolved shear stress with respect to split
+   * rate.
+   */
+  virtual void calcDtauDsliprate();
+
+  /**
+   * This function calculates partial derivative of slip system resistances with respect to split
+   * rate.
+   */
+  virtual void calcDgssDsliprate();
+
+  /**
+   * This function calculates and updates the residual of slip rate.
+   */
+  void calcUpdate();
+
+  /**
+   * This function calculates the residual norm.
+   */
+  virtual Real calcResidNorm();
+
+  /**
+   * This function performs the line search update.
+   */
+  bool lineSearchUpdateSlipRate(const Real, const DenseVector&lt;Real&gt; &amp;);
+
+  /**
+   * This function calculates the dot product of residual and update
+   */
+  Real calcResidDotProdUpdate(const DenseVector&lt;Real&gt; &amp;);
+
+  DenseVector&lt;Real&gt; _resid;
+  DenseVector&lt;Real&gt; _slip_rate;
+  DenseVector&lt;Real&gt; _dsliprate_dgss;
+  DenseMatrix&lt;Real&gt; _jacob;
+  DenseMatrix&lt;Real&gt; _dsliprate_dsliprate;
+};
+</code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div></section><section class="scrollspy" id="b0f37b3b-ffb0-4815-ab70-5e7623195216" data-section-level="2" data-section-text="References"><h2 id="references">References</h2><div class="moose-bibliography"><ol><li id="kalidindi1992">Surya&nbsp;R Kalidindi, Curt&nbsp;A Bronkhorst, and Lallit Anand.
+Crystallographic texture evolution in bulk deformation processing of fcc metals.
+<em>Journal of the Mechanics and Physics of Solids</em>, 40(3):537–569, 1992.<a href="#36e24ef3-1cbe-4079-a4ac-6d9df26879f8" class="modal-trigger moose-bibtex-modal" style="padding-left:10px;">[BibTeX]</a><div class="modal" id="36e24ef3-1cbe-4079-a4ac-6d9df26879f8"><div class="modal-content"><pre style="line-height:1.25;"><code class="language-latex">@article{kalidindi1992,
+    author = "Kalidindi, Surya R and Bronkhorst, Curt A and Anand, Lallit",
+    title = "Crystallographic texture evolution in bulk deformation processing of FCC metals",
+    journal = "Journal of the Mechanics and Physics of Solids",
+    volume = "40",
+    number = "3",
+    pages = "537--569",
+    year = "1992",
+    publisher = "Elsevier"
+}
+</code></pre></div></div></li></ol></div></section></section></div><div class="col hide-on-med-and-down l2"><div class="toc-wrapper pin-top"><ul class="section table-of-contents"><li><a href="#928d6ed9-5157-4aa8-931f-80de95e977e8" class="tooltipped" data-position="left" data-tooltip="Description">Description</a></li><li><a href="#2099a676-8b17-45c7-a680-7dce5c02d4a0" class="tooltipped" data-position="left" data-tooltip="Units Assumed in the Crystal Plasticity Materials">Units Assumed in the Crystal Plasticity Materials</a></li><li><a href="#6a998ee8-fda9-492c-ab86-eb355eb15445" class="tooltipped" data-position="left" data-tooltip="Input Parameters">Input Parameters</a></li><li><a href="#ad30bf6f-10ae-413a-b9f1-0a19f3371f37" class="tooltipped" data-position="left" data-tooltip="Input Files">Input Files</a></li><li><a href="#121a2df1-447e-487d-9b08-9b87544aceb5" class="tooltipped" data-position="left" data-tooltip="Child Objects">Child Objects</a></li><li><a href="#b0f37b3b-ffb0-4815-ab70-5e7623195216" class="tooltipped" data-position="left" data-tooltip="References">References</a></li></ul></div></div></div></div></main></div></body><script type="text/javascript" src="../../js/google_analytics.js"></script><script type="text/javascript" src="../../contrib/materialize/materialize.min.js"></script><script type="text/javascript" src="../../contrib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="../../contrib/prism/prism.min.js"></script><script type="text/javascript" src="../../js/init.js"></script><script type="text/javascript" src="../../js/navigation.js"></script><script type="text/javascript" src="https://cse.google.com/cse.js?cx=000781241768298771085:pedtnlxdkx8"></script><script type="text/javascript" src="../../js/sqa_moose.js"></script>
