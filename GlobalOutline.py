@@ -100,6 +100,7 @@ def dNvecdxi(xi,eta):
 # Intialize internal variables
 n_IP = 4 # Integration points
 S_all = np.zeros([2,2,n_elem,n_IP,nSteps]) # Contains Stress S for each element and each integration point
+sigma_all = np.zeros([2,2,n_elem,n_IP,nSteps])
 T_all = const_dictionary["T"] * np.ones(nSteps) # TODO (Depends on what temp we put in dicitionary) Kelvin, should be nnodes* ntime?
 # p_all = np.zeros([nSteps])
 
@@ -114,7 +115,7 @@ g_all[:,:,:,:,0] =103.03e6 * np.ones([10,1,n_elem,n_IP]) # 1e7 times smaller tha
 # Initialize first guess for plastic deformation gradient
 for i_elem in range(n_elem):
     for i_p in range(n_IP): # 4 
-        F_p_all[:,:,i_elem,i_p,0] = np.eye(2)*1.000000001
+        F_p_all[:,:,i_elem,i_p,0] = np.eye(2)
 
 # Keep track of displacements at all time steps
 u_vec = np.zeros((n_nodes,2,nSteps))
@@ -126,6 +127,9 @@ u_vec = np.zeros((n_nodes,2,nSteps))
 # v_current = np.zeros(n_nodes,2)
 g_prev=g_all[:,:,:,:,0]
 F_p_prev = F_p_all[:,:,:,:,0]
+S_prev = S_all[:,:,:,:,0]
+sigma_prev = sigma_all[:,:,:,:,0]
+resultant_increment_prev = np.zeros([2,2])
 
 
 # # TODO: define M, the mass matrix. 

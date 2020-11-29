@@ -54,3 +54,51 @@ def computeSecondPiola(F_e,const_dictionary,v):
     S=S_el+S_eos  # vis dropped for now
     
     return S,S_eos,S_el_voigt,p_eos
+
+def computeSecondPiolaJacobian(S_prev,F_p_prev,F,C_elastic):
+
+
+    # Plastic deformation inverse
+    F_p_inv_prev = np.linalg.inv(F_p_prev)
+    # Elastic deformation gradient
+    F_e_prev = np.dot(F,F_p_inv)
+
+    def KronDel(m,n):
+        if m==n:
+            delta = 1
+        else: 
+            delta = 0
+        return delta
+
+    # 4th order identity
+    II = np.zeros((2,2,2,2))
+    # Other components of tangent
+    dFedFpinv = np.zeros([2,2,2,2])
+    dEedFe = np.zeros([2,2,2,2])
+    for i in range(2):
+        for j in range(2):
+            for k in range(2):
+                for l in range(2):
+                    II[i,j,k,l] = KronDel(i,k)*KronDel(j,l)
+                    dFedFpinv[i,j,k,l] = F[i,k]*KronDel(l,j)
+                    dEedFe[i,j,k,l] = (0.5*KronDel(i,l)*F_e_prev[k,j]+0.5*KronDel(j,l)*F_e_prev[k,i])
+
+
+    dFpinvdDResultantInc = F_p_inv_prev
+    dDResultantIncdSlipRate = np.zeros([3,3])
+    # TODO need to make dimensions agree (dDResultantIncdSlipRate should be a 2x2)
+    for s_i in range(10):
+        dDResultantIncdSlipRate -= getSchmidTensor(s_i)
+
+    # TODO need to compute the last 2 terms of the tangent
+    dSlipRatedtao = 
+    dtaodSprev = 
+
+    # Compute Second Piola Kirchoff tangent
+    # TODO need right operations in between variables
+    S_tangent (2,2,2,2)= dEedFe(2,2,2,2) : dFedFpinv(2,2,2,2) : dFpinvdDResultantInc(2,2) : dDResultantIncdSlipRate(3,3) : dSlipRatedtao : dtaodSprev
+
+    # Jacobian of Second Piola Kirchoff
+    J_S = II - np.tensordot(C_elastic,S_tangent,axes=2)
+
+    return J_S
