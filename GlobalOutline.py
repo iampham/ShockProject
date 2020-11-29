@@ -15,8 +15,8 @@ C_ela = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
 C_ela = C_ela[0:3,0:3] # Elasticity tensor for a 2D problem
 
 const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
-"T" : 300, # TODO ARBITRARY VALUE FOR NOW Ambient temperature of material [K]
-"T_0" : 300, # Reference temperature of material [K]
+"T" : 300., # TODO ARBITRARY VALUE FOR NOW Ambient temperature of material [K]
+"T_0" : 300., # Reference temperature of material [K]
 "rho_0" : 1.891e3 ,# Initial density [Kg/m^3] 
 "v_0" : 1/1.891e3, # specific volume of material at reference temp [m^3/Kg]
 "K_0" : 17.822e9, # Reference bulk modulus [Pa]
@@ -29,13 +29,13 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "a" : 2.5, # Hardening exponent []
 "h" : 9.34e6, # Hardening matrix [Pa]
 "C_ela" : C_ela,
-"C_s": 3070, # reference bulk speed of sound [m/s] 
+"C_s": 3070., # reference bulk speed of sound [m/s] 
 "n_IP":4 # integration pts per elem
 }
 
 # Loop over time steps n 
 timeStart = 0
-timeEnd = 1e-3
+timeEnd = 1e-6
 nSteps = 100
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
@@ -43,7 +43,7 @@ t_vec = np.linspace(timeStart,timeEnd, nSteps)
 deltat = t_vec[1] - t_vec[0]
 
 # particle vel
-U_p=100 # 100m/s
+U_p=2000 # 100m/s
 # assuming that the material does not undergo phase transition, Us is linear with Up
 U_s=const_dictionary["C_s"]+const_dictionary["s"]*U_p
 # find v1 
@@ -72,7 +72,7 @@ for i in range(n_nodes):
     node_x[i] = X
     # but then apply boundary conditions
     if X[0]<=deltat*U_p:
-        node_x[i,0] += deltat*U_p
+        node_x[i,0] += deltat*U_p #
     if X[1]<0.00001: 
         node_x[i,1] = 0.
     if X[0]>0.9999: 
@@ -109,12 +109,12 @@ F_p_all = np.zeros([2,2,n_elem,n_IP,nSteps])
 g_all = np.zeros([10,1,n_elem,n_IP,nSteps])
 
 # Intitial condition of hardening
-g_all[:,:,:,:,0] = np.ones([10,1,n_elem,n_IP])
+g_all[:,:,:,:,0] =103.03e6 * np.ones([10,1,n_elem,n_IP]) # 1e7 times smaller than g_dot_ref?
 
 # Initialize first guess for plastic deformation gradient
 for i_elem in range(n_elem):
     for i_p in range(n_IP): # 4 
-        F_p_all[:,:,i_elem,i_p,0] = np.eye(2)
+        F_p_all[:,:,i_elem,i_p,0] = np.eye(2)*1.000000001
 
 # Keep track of displacements at all time steps
 u_vec = np.zeros((n_nodes,2,nSteps))
@@ -137,7 +137,7 @@ F_p_prev = F_p_all[:,:,:,:,0]
 res = 1.
 iter = 0
 tol = 1e-5
-itermax = 100
+itermax = 1000
 
 # Initial shock boundary
 shock_bound = 0 
@@ -200,14 +200,13 @@ for tIndex in range(1, len(t_vec)):
         # but then apply boundary conditions
         if X[0]<=deltat*U_p:
             node_x[i,0] += deltat*U_p
-        # TODO: commented BS for testing
-        # if X[1]<0.00001: 
-        #     node_x[i,1] = 0.
-        # # right boundary fixed for all time
-        # if X[0]>0.9999: 
-        #     node_x[i,0] = 1.
-        # if X[1]>0.9999: 
-        #     node_x[i,1] = 1.
+        if X[1]<0.00001: 
+            node_x[i,1] = 0.
+        # right boundary fixed for all time
+        if X[0]>0.9999: 
+            node_x[i,0] = 1.
+        if X[1]>0.9999: 
+            node_x[i,1] = 1.
 
     # Update velocity, displacement
     # v_next = v_current +1/2 * deltat (a_current + a_next)
@@ -249,6 +248,10 @@ for tIndex in range(1, len(t_vec)):
     F_p_all[:,:,:,:,tIndex] = F_p_next
 
     g_all[:,:,:,:,tIndex] = g_next
+    print("F_next",F_next[:,:,4,0])
+    print("F_e_next",F_e_next[:,:,4,0])
+    print("F_p_next",F_p_next[:,:,4,0])
+    print("S_next",S_next[:,:,4,0])
 
     # 
     # u_current = u_next

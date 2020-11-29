@@ -17,7 +17,8 @@ def computeSecondPiola(F_e,const_dictionary,v):
     h = const_dictionary["h"]# Hardening matrix [Pa]
     C_elastic = const_dictionary["C_ela"]
 
-    
+    # # TODO: debugging, force F to I
+    # F_e=np.eye(2)*0.99
 
     J = np.linalg.det(F_e)
 
@@ -46,6 +47,9 @@ def computeSecondPiola(F_e,const_dictionary,v):
     chi = 1 - v/v_0
     p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
     S_eos = -J * p_eos * np.linalg.inv(C_e)
+
+    # TODO : debugging, make eos term 0
+    S_eos=np.zeros([2,2])
 
     S=S_el+S_eos  # vis dropped for now
     
