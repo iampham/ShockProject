@@ -71,34 +71,42 @@ def computeSecondPiolaJacobian(S_prev,F_p_prev,F,C_elastic):
         return delta
 
     # 4th order identity
-    II = np.zeros((2,2,2,2))
+    II = np.zeros([3,3,3,3])
     # Other components of tangent
-    dFedFpinv = np.zeros([2,2,2,2])
-    dEedFe = np.zeros([2,2,2,2])
-    for i in range(2):
-        for j in range(2):
-            for k in range(2):
-                for l in range(2):
+    dFedFpinv = np.zeros([3,3,3,3])
+    dEedFe = np.zeros([3,3,3,3])
+    for i in range(3):
+        for j in range(3):
+            for k in range(3):
+                for l in range(3):
                     II[i,j,k,l] = KronDel(i,k)*KronDel(j,l)
                     dFedFpinv[i,j,k,l] = F[i,k]*KronDel(l,j)
                     dEedFe[i,j,k,l] = (0.5*KronDel(i,l)*F_e_prev[k,j]+0.5*KronDel(j,l)*F_e_prev[k,i])
 
 
+    # TODO need F_p_inv_prev to be (3x3)
+    dFpinvdDResultantInc = np.zeros([3,3])
     dFpinvdDResultantInc = F_p_inv_prev
-    dDResultantIncdSlipRate = np.zeros([3,3])
-    # TODO need to make dimensions agree (dDResultantIncdSlipRate should be a 2x2)
-    for s_i in range(10):
-        dDResultantIncdSlipRate -= getSchmidTensor(s_i)
 
-    # TODO need to compute the last 2 terms of the tangent
-    dSlipRatedtao = 
-    dtaodSprev = 
+    dDResultantIncdSlipRate = np.zeros([3,3])
+    dtaodSprev = np.zeros([3,3])
+
+    # Iterating for all slip systems alpha  
+    for alpha_i in range(10):
+        dDResultantIncdSlipRate -= getSchmidTensor(alpha_i)
+        dtaodSprev = getSchmidTensor(alpha_i)
+
+    # TODO Need this function from Moose
+    dSlipRatedtao(3,3) = calcSlipRateDerivative(_qp, _dt, dslipdtau) 
+     
+    dFpinvdSprev(3,3,3,3) = [dFpinvdDResultantInc(3,3)* dDResultantIncdSlipRate(3,3) * dSlipRatedtao(3,3)] dyadicproduct dtaodSprev(3,3)
 
     # Compute Second Piola Kirchoff tangent
-    # TODO need right operations in between variables
-    S_tangent (2,2,2,2)= dEedFe(2,2,2,2) : dFedFpinv(2,2,2,2) : dFpinvdDResultantInc(2,2) : dDResultantIncdSlipRate(3,3) : dSlipRatedtao : dtaodSprev
+    # TODO need dimensions to agree
+    S_tangent (3,3,3,3)= np.tensordot(dEedFe(3,3,3,3),np.tensordot(dFedFpinv(3,3,3,3),dFpinvdSprev(3,3,3,3),axes=2),axes=2)
 
     # Jacobian of Second Piola Kirchoff
-    J_S = II - np.tensordot(C_elastic,S_tangent,axes=2)
+    # TODO need to use 4th order C_elastic, not voigt
+    J_S = II(3,3,3,3) - np.tensordot(C_elastic(3,3,3,3),S_tangent(3,3,3,3),axes=2)
 
     return J_S
