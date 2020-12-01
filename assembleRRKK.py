@@ -143,8 +143,11 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     
                     # Residual and Jacobian to compute Next Stress
                     res_S = S_prev - S_next # Residual TODO need S_next
-                    J_S = computeSecondPiolaJacobian(S_prev,F_p_prev_loc,F,C_elastic) # TODO need F_p_inv
+                    J_S = computeSecondPiolaJacobian(S_prev,F_p_prev_loc,F,g_prev_loc,dt,const_dictionary) 
 
+                    # compute deltaS and add it to S
+                    S_next = S_prev - 
+                    
 
                     # TODO make sense of all these code lines until line 188
                     if x[0]<shock_bound:
