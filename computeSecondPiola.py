@@ -80,15 +80,19 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     # Go to 3D
     S_prev_3D = np.zeros([3,3])
     S_prev_3D[0:2,0:2] = S_prev
-    F_p_prev_3D = np.zeros([3,3])
+    F_p_prev_3D = np.eye(3)
     F_p_prev_3D[0:2,0:2] = F_p_prev
-    F_3D = np.zeros([3,3])
+    F_3D = np.eye(3)
     F_3D[0:2,0:2] = F
 
     # Plastic deformation inverse
     F_p_inv_prev = np.linalg.inv(F_p_prev_3D)
     # Elastic deformation gradient
     F_e_prev = np.dot(F_3D,F_p_inv_prev)
+
+    # Compute Residual
+    S_prime = np.tensordot(C_ela_3d,0.5*(np.dot(F_e_prev.transpose(),F_e_prev)-np.eye(3)),axes=2)
+    res_S = S_prev_3D - S_prime
 
     def KronDel(m,n):
         if m==n:
