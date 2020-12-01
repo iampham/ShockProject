@@ -5,6 +5,8 @@ def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
     
     result_inc, g_next=calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
     # print("result_inc, " ,result_inc) # result inc is huge e80 for now
+
+
     F_p_next=np.dot(result_inc,F_p)
 
     return F_p_next,g_next
@@ -72,7 +74,14 @@ def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
     schmidTensor = getSchmidTensor(index)
     ### Need to verify what equation is correct: report or paper ###
 
-    tau_s = np.tensordot(np.dot(F.transpose(), np.dot(F,S)), schmidTensor,axes=2) 
+    #### ANDREW's DEBUGGING #2: this is the implementation for calculating tau_s that i found in moose."CrystalSlipRatePlasticityGSS.C"
+    #### This seems to agree with Nicolo's paper. 
+    tau_s = np.tensordot(S,schmidTensor,axes=2)
+    # tau_s = np.tensordot(np.dot(F.transpose(), np.dot(F,S)), schmidTensor,axes=2) 
+
+
+
+
     #print("F",F)  # close to identity matrix
     #print("S",S)  # composed of e7 values, some times all values close to 0
     # print("schmidTensor",schmidTensor) # composed of 0,1,-1
@@ -82,8 +91,14 @@ def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
 
     tau_th_s = getStrengthRatio(index) * g_si
     slipRate = gamma_dot_ref * np.sign(tau_s) * np.abs(tau_s/tau_th_s)**(1/m)
+
+    
     #print("slipRate",slipRate) # sliprate is huge e80 for now
     # input("press enter")
+
+    # print('S',S)
+    # print('tau_s', tau_s)
+    # print('tau_th_s',tau_th_s)
 
     return slipRate, schmidTensor,tau_th_s,tau_s
 
@@ -93,11 +108,14 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
 
 
     for i in range(10):
+        # Andrew's debugging: the next resistance must take into account the slip from all slip planes.
+        for j in range(10):
 
-        g_dot[i] = h * (1-g_prev[i]/g_sat)**a * slipRates[i]
+            g_dot[i] += h * (1-g_prev[j]/g_sat)**a * slipRates[j]
 
     # Time discretization of ODE
     g_current = g_prev + dt*g_dot
+
     
     return g_current
 
@@ -154,3 +172,17 @@ def getSlipSystems(index):
     slipDirection = slipDirections[index]
 
     return slipDirection, slipPlane
+
+def notConvergedYet(g_prev,g_current, g_tol):
+    
+    numSlipPlanes = np.shape(g_prev)[0]
+    
+    for i in range(numSlipPlanes):
+        diff = np.abs(g_prev[i] - g_current[i])
+
+        if diff > (np.abs(g_prev[i])*g_tol):
+            print('Comparison',g_prev[i],g_current[i])
+            return True
+
+
+    return False

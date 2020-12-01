@@ -51,23 +51,32 @@ C_ela_2d_voigt = const_dictionary["C_ela_2d_voigt"]
 C_ela_3d=const_dictionary["C_ela_3d"]
 v=v_0
 S_prev=np.ones([2,2])*1000
-F_p_prev_loc=np.eye(2)*0.9
-F_e_prev_loc=np.eye(2)
-F=np.eye(2)*1.1
-g_prev_loc=np.ones([10,1])*1e6
-dt=1e-5
-g_prev = np.ones([10,1,8,4])*1e6
+
+# ANDREW's DEBUGGING SESSION 1: NEED A TINY DEFORMATION GRADIENT, STRESSES ARE GIANT
+F_p_prev_loc=np.eye(2)
+F_e_prev_loc=np.eye(2)*.999
+F= np.dot(F_e_prev_loc,F_p_prev_loc)
+g_prev_loc=np.ones([10,1])*100e6
+dt=1e-10
+g_prev = np.ones([10,1,8,4])*100e6
 ei=0
 ip=0
 
 # Slip resistance stop parameter
-g_tol = 1e-5
+g_tol = 1e-4
 # Initialize g_max
 g_max = 1
-g_itermax = 3
+g_itermax = 100
 g_iter = 0
 x = np.zeros((2))
-while (np.linalg.norm(g_max)>np.linalg.norm(g_tol) and g_iter<g_itermax):
+
+g_diff = 1
+
+g_not_converged = True
+g_prev_loc=g_prev[:,:,ei,ip]
+
+
+while (g_not_converged and g_iter<g_itermax):
     
     # Pre solve stress
     # according to the current shockwave boundary and coordinates of ip, update v
@@ -97,7 +106,7 @@ while (np.linalg.norm(g_max)>np.linalg.norm(g_tol) and g_iter<g_itermax):
         J_S=J_S[0:2,0:2,0:2,0:2]
         res_S=res_S[0:2,0:2]
         delta_S = -np.tensordot(np.linalg.tensorinv(J_S),res_S,axes=2)
-        print(delta_S)
+        # print(delta_S)
         S_next = S_prev + delta_S[0:2,0:2]
         S_next = S_next[0:2,0:2] # Go back to 2D
         # Stop criteria
@@ -112,25 +121,27 @@ while (np.linalg.norm(g_max)>np.linalg.norm(g_tol) and g_iter<g_itermax):
         S_prev=S_next
         S_iter += 1
         # print("S_iter: ",S_iter)
-        print("res:",norm_res_S)
+        # print("res:",norm_res_S)
 
     #print("S", S_prev)
     # g_sub
-    g_prev_loc=g_prev[:,:,ei,ip]
     F_e_current = F_e_current[0:2,0:2]
 
     F_p_next, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_next)
     
     print("g_current",g_current)
-    g_diff = np.abs(g_prev_loc-g_current)
-    if np.linalg.norm(g_diff)>np.linalg.norm(g_max):
-        g_max = g_diff
+    # g_diff = np.abs(g_prev_loc-g_current)
 
+    # g_diff = np.linalg.norm(g_diff)
+    # if g_diff > g_tol:
+    #     g_max = g_diff
+
+    g_not_converged = notConvergedYet(g_prev_loc,g_current,g_tol)
     g_iter += 1
     g_prev_loc=g_current
     print("g_iter: ",g_iter)
-    print("g_max_norm",np.linalg.norm(g_max))
-    print("g_diff_norm", np.linalg.norm(g_diff))
 
-    if np.linalg.norm(g_max) == np.nan:
+    # print(np.linalg.det(F_p_next))
+
+    if np.linalg.norm(g_diff) == np.nan:
         break

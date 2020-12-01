@@ -1,1 +1,4 @@
 Linearization.xoj
+/references/*
+/__pycache__/*
+/.vscode/*
