@@ -131,76 +131,39 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                 # Initialize stress residual
                 res_S = 1.
+                norm_res_S = 1
                 S_iter = 0
                 S_tol = 1e-5
                 S_itermax = 1000
 
                 # Solve Stress newton raphson
-                while (res_S>S_tol and S_iter<S_itermax):
+                while (norm_res_S>S_tol and S_iter<S_itermax):
 
                
                     # according to the current shockwave boundary and coordinates of ip, update v
                     
                     # Residual and Jacobian to compute Next Stress                    
-                    res_S, J_S = computeSecondPiolaResidualJacobian(S_prev,F_p_prev_loc,F,g_prev_loc,dt,const_dictionary) 
+                    res_S, J_S, F_e_current = computeSecondPiolaResidualJacobian(S_prev,F_p_prev_loc,F,g_prev_loc,dt,const_dictionary) 
 
-                    # compute deltaS and add it to S
-                    # delta_S = np.linalg.solve(J_S,res_S)
-                    delta_S = np.tensordot(np.linalg.inv(J_S),res_S,axes=2)
-                    S_next = S_prev - delta_S
+                    # compute delta_S and add it to S
+                    delta_S = -np.tensordot(np.linalg.inv(J_S),res_S,axes=2)
+                    S_next = S_prev + delta_S
                     S_next = S_next[0:2,0:2] # Go back to 2D
+                    # Stop criteria
+                    norm_res_S = np.linalg.norm(res_S)
 
-                    # TODO make sense of all these code lines until line 188
-                    if x[0]<shock_bound:
-                        S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v)
-                    else:
-                        S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
-                    # Iteration to calculate actual split of F=F_p*F_e
-                    
-                    g_prev_loc=g_prev[:,:,ei,ip]
-                    F_p, g_loc = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_prev_loc, S_prev)
-                    # TODO we are getting a huge F_p (1e80+) and that makes F_e really small
-                    # print("F_p_prev_loc",F_p_prev_loc,"gamma_dot_ref",gamma_dot_ref,"m",m, "g_sat",g_sat, "g_prev_loc",g_prev_loc,\
-                    #       "a",a, "h",h, "dt",dt, "F_e_prev_loc",F_e_prev_loc, "S_prev",S_prev)
-
-                    # F_p = np.eye(2) # TODO 27 nov 2020 debugging proved that elastic part is working properly, still need to figure out how to make the plastic part work
-                    F_e = np.dot(F,  np.linalg.inv(F_p))            
-                    # print("F",F)
-                    # print("F_p",F_p)
-                    # print("F_e",F_e)
-
-
-
-                    J = np.linalg.det(F_e)
-
-                    C_e = np.dot(F_e.transpose(), F_e)
-                    # special dyadic product of C_e
-                    C_e_inv = np.linalg.inv(C_e)
-                    # C_inv Special Dyad C_inv
-                    dyad_bar = np.zeros([2,2,2,2])
-                    for i in range(2):
-                        for j in range(2):
-                            for k in range(2):
-                                for l in range(2):
-                                    dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
-
-                    if x[0]<shock_bound:
-                        S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v)
-                    else:
-                        S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v_0)
+                    # # TODO Need to add shock condition to next guess of S_prev
+                    # if x[0]<shock_bound:
+                    #     S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v)
+                    # else:
+                    #     S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
+                    # # Iteration to calculate actual split of F=F_p*F_e
 
                     S_iter += 1
 
-
-                # Post Solve Stress TODO compute actual F_p
-                F_p = 
-                F_e = np.dot(F,np.linalg.inv(F_p))
-                # F_p_prev_loc = F_p_prev[:,:,ei,ip]
-                # calculate F_e from F and F_p
-                # F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
-
-                # TODO Need to output g_current (Update slip system resistance)
-                g_current = 
+                    
+                g_prev_loc=g_prev[:,:,ei,ip]
+                F_p_next, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_next)
 
                 g_diff = np.linalg.abs(g_prev_loc-g_current)
                 if g_diff>g_max:
@@ -208,15 +171,57 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                 g_iter += 1
 
-            # Compute Cauchy with actual value of elastic deformation    
-            sigma = (1/J)*np.dot(F_e,np.dot(S,F_e.transpose()))
+                # TODO we are getting a huge F_p (1e80+) and that makes F_e really small
+                # print("F_p_prev_loc",F_p_prev_loc,"gamma_dot_ref",gamma_dot_ref,"m",m, "g_sat",g_sat, "g_prev_loc",g_prev_loc,\
+                #       "a",a, "h",h, "dt",dt, "F_e_prev_loc",F_e_prev_loc, "S_prev",S_prev)
+
+                # # F_p = np.eye(2) # TODO 27 nov 2020 debugging proved that elastic part is working properly, still need to figure out how to make the plastic part work
+                # F_e = np.dot(F,  np.linalg.inv(F_p))            
+                # # print("F",F)
+                # # print("F_p",F_p)
+                # # print("F_e",F_e)
+
+
+
+                # J = np.linalg.det(F_e)
+
+                # C_e = np.dot(F_e.transpose(), F_e)
+                # # special dyadic product of C_e
+                # C_e_inv = np.linalg.inv(C_e)
+                # # C_inv Special Dyad C_inv
+                # dyad_bar = np.zeros([2,2,2,2])
+                # for i in range(2):
+                #     for j in range(2):
+                #         for k in range(2):
+                #             for l in range(2):
+                #                 dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
+
+                # if x[0]<shock_bound:
+                #     S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v)
+                # else:
+                #     S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v_0)       
+
+    
+            # F_p_current = np.dot(F,np.linalg.inv(F_p))            
+            # F_p_prev_loc = F_p_prev[:,:,ei,ip]
+            # calculate F_e from F and F_p
+            # F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
+
+            # Post Solve Stress
+
+            # Compute Second Piola Kirchoff
+            E = 0.5*((np.dot(F_e.transpose(),F_e)-np.eye(2))
+
+            # Compute Cauchy with actual value of elastic deformation
+            J = np.linalg.det(F)  
+            sigma = (1/J)*np.dot(F_e_current,np.dot(S_next,F_e_current.transpose()))
             
             # store results in global variables
-            g_next[:,:,ei,ip] = g_loc
+            g_next[:,:,ei,ip] = g_current
             sigma_next[:,:,ei,ip] = sigma
-            S_next[:,:,ei,ip] = S
-            F_e_next[:,:,ei,ip] = F_e
-            F_p_next[:,:,ei,ip] = F_p
+            S_next[:,:,ei,ip] = S_next
+            F_e_next[:,:,ei,ip] = F_e_current
+            F_p_next[:,:,ei,ip] = F_p_prev_loc
             F_next[:,:,ei,ip] = F
 
             # compute the variation of the symmetric velocity gradient by moving one node and one component

@@ -90,7 +90,7 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     # Elastic deformation gradient
     F_e_prev = np.dot(F_3D,F_p_inv_prev)
 
-    # Compute Residual
+    # Compute Second Piola Kirchoff Residual
     S_prime = np.tensordot(C_ela_3d,0.5*(np.dot(F_e_prev.transpose(),F_e_prev)-np.eye(3)),axes=2)
     # print(S_prime)
     res_S = S_prev_3D - S_prime
@@ -149,4 +149,4 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     # Jacobian of Second Piola Kirchoff
     J_S = II- np.tensordot(C_ela_3d,S_tangent,axes=2)
 
-    return res_S, J_S
+    return res_S, J_S, F_e_prev
