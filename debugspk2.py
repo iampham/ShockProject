@@ -34,14 +34,16 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "n_IP":4 # integration pts per elem
 }
 
-S_prev=np.ones([3,3])
-F_p_prev=np.eye(3)*0.5
-F=np.eye(3)
+S_prev=np.ones([2,2])*1e6
+F_p_prev=np.eye(2)*0.5
+F=np.eye(2)*0.8
 g=np.ones([10,1])*1e6
 dt=0.1
 
 
-J_S=computeSecondPiolaJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary)
+res_S,J_S=computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary)
 
-print(J_S)
-print(np.shape(J_S))
+# print(J_S)
+# print(np.shape(J_S))
+
+print("res_S",res_S)

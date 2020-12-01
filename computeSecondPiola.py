@@ -92,6 +92,7 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
 
     # Compute Residual
     S_prime = np.tensordot(C_ela_3d,0.5*(np.dot(F_e_prev.transpose(),F_e_prev)-np.eye(3)),axes=2)
+    # print(S_prime)
     res_S = S_prev_3D - S_prime
 
     def KronDel(m,n):
@@ -133,7 +134,9 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
 
         # get g_si
         g_si=g[alpha_i]
-        tau,schmid,tau_th=calculateSlipRate(F_3D,S_prev_3D,gamma_dot_ref, m, g_si, alpha_i)
+        slipRate, schmidTensor,tau_th,tau=calculateSlipRate(F_3D,S_prev_3D,gamma_dot_ref, m, g_si, alpha_i)
+        print("tau",tau)
+        print("tau_th",tau_th)
         dSlipRatedtau[alpha_i]=gamma_dot_ref / m * (np.abs(tau/tau_th)**(1/m-1.))/tau_th # scalar
 
         # calculate dFpinvdSprev by combining terms above
