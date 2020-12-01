@@ -7,13 +7,13 @@ from mat2tens import *
 # Parameters we use in function
 
 # Elastic Tensor CC # TODO verify 
-C_ela_3d = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
+C_ela_3d_voigt = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
                       [10.18,20.34,13.35,0.23,6.96,0.14],\
                       [9.77,13.35,21.27,-0.004,5.01,0.19],\
                       [0.058,0.23,-0.004,8.79,0.32,4.16],\
                       [4.05,6.96,5.01,0.32,6.20,0.22],\
                       [-0.18,0.14,0.19,4.16,0.22,10.00]]) # elasticity tensor for a 3D problem
-C_ela_2d_voigt = C_ela_3d[0:3,0:3] # Elasticity tensor for a 2D problem
+C_ela_2d_voigt = C_ela_3d_voigt[0:3,0:3] # Elasticity tensor for a 2D problem
 
 C_ela_3d = mat2tens(C_ela_3d_voigt) #  3 3 3 3
 
