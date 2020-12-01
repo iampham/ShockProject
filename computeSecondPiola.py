@@ -57,7 +57,7 @@ def computeSecondPiola(F_e,const_dictionary,v):
     
     return S,S_eos,S_el_voigt,p_eos
 
-def computeSecondPiolaJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
+def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     # Assume S,FP,F are 3*3 matrices
     # Parameters we use in function
     Gamma = const_dictionary["Gamma"] # Mie Gruneisen Parameter []
@@ -77,11 +77,18 @@ def computeSecondPiolaJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     C_ela_2d_voigt = const_dictionary["C_ela_2d_voigt"]
     C_ela_3d=const_dictionary["C_ela_3d"]
 
+    # Go to 3D
+    S_prev_3D = np.zeros([3,3])
+    S_prev_3D[0:2,0:2] = S_prev
+    F_p_prev_3D = np.zeros([3,3])
+    F_p_prev_3D[0:2,0:2] = F_p_prev
+    F_3D = np.zeros([3,3])
+    F_3D[0:2,0:2] = F
 
     # Plastic deformation inverse
-    F_p_inv_prev = np.linalg.inv(F_p_prev)
+    F_p_inv_prev = np.linalg.inv(F_p_prev_3D)
     # Elastic deformation gradient
-    F_e_prev = np.dot(F,F_p_inv_prev)
+    F_e_prev = np.dot(F_3D,F_p_inv_prev)
 
     def KronDel(m,n):
         if m==n:
@@ -100,7 +107,7 @@ def computeSecondPiolaJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
             for k in range(3):
                 for l in range(3):
                     II[i,j,k,l] = KronDel(i,k)*KronDel(j,l)
-                    dFedFpinv[i,j,k,l] = F[i,k]*KronDel(l,j)
+                    dFedFpinv[i,j,k,l] = F_3D[i,k]*KronDel(l,j)
                     dEedFe[i,j,k,l] = (0.5*KronDel(i,l)*F_e_prev[k,j]+0.5*KronDel(j,l)*F_e_prev[k,i])
 
 
@@ -122,7 +129,7 @@ def computeSecondPiolaJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
 
         # get g_si
         g_si=g[alpha_i]
-        tau,schmid,tau_th=calculateSlipRate(F,S_prev,gamma_dot_ref, m, g_si, alpha_i)
+        tau,schmid,tau_th=calculateSlipRate(F_3D,S_prev_3D,gamma_dot_ref, m, g_si, alpha_i)
         dSlipRatedtau[alpha_i]=gamma_dot_ref / m * (np.abs(tau/tau_th)**(1/m-1.))/tau_th # scalar
 
         # calculate dFpinvdSprev by combining terms above
@@ -135,4 +142,4 @@ def computeSecondPiolaJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     # Jacobian of Second Piola Kirchoff
     J_S = II- np.tensordot(C_ela_3d,S_tangent,axes=2)
 
-    return J_S
+    return res_S, J_S

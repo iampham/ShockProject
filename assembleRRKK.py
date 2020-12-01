@@ -141,13 +141,14 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                
                     # according to the current shockwave boundary and coordinates of ip, update v
                     
-                    # Residual and Jacobian to compute Next Stress
-                    res_S = S_prev - S_next # Residual TODO need S_next
-                    J_S = computeSecondPiolaJacobian(S_prev,F_p_prev_loc,F,g_prev_loc,dt,const_dictionary) 
+                    # Residual and Jacobian to compute Next Stress                    
+                    res_S, J_S = computeSecondPiolaResidualJacobian(S_prev,F_p_prev_loc,F,g_prev_loc,dt,const_dictionary) 
 
                     # compute deltaS and add it to S
-                    S_next = S_prev - 
-                    
+                    # delta_S = np.linalg.solve(J_S,res_S)
+                    delta_S = np.tensordot(np.linalg.inv(J_S),res_S,axes=2)
+                    S_next = S_prev - delta_S
+                    S_next = S_next[0:2,0:2] # Go back to 2D
 
                     # TODO make sense of all these code lines until line 188
                     if x[0]<shock_bound:
