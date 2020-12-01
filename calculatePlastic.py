@@ -84,7 +84,7 @@ def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
     #print("slipRate",slipRate) # sliprate is huge e80 for now
     # input("press enter")
 
-    return slipRate, schmidTensor
+    return slipRate, schmidTensor,tau_th_s
 
 def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
 

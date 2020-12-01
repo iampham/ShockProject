@@ -2,17 +2,20 @@
 import numpy as np 
 from assembleRRKK import *
 from calculatePlastic import *
+from mat2tens import *
 
 # Parameters we use in function
 
 # Elastic Tensor CC # TODO verify 
-C_ela = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
+C_ela_3d_voigt = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
                       [10.18,20.34,13.35,0.23,6.96,0.14],\
                       [9.77,13.35,21.27,-0.004,5.01,0.19],\
                       [0.058,0.23,-0.004,8.79,0.32,4.16],\
                       [4.05,6.96,5.01,0.32,6.20,0.22],\
                       [-0.18,0.14,0.19,4.16,0.22,10.00]]) # elasticity tensor for a 3D problem
-C_ela = C_ela[0:3,0:3] # Elasticity tensor for a 2D problem
+C_ela_2d_voigt = C_ela_3d[0:3,0:3] # Elasticity tensor for a 2D problem
+
+C_ela_3d = mat2tens(C_ela_3d_voigt) #  3 3 3 3
 
 const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "T" : 300., # TODO ARBITRARY VALUE FOR NOW Ambient temperature of material [K]
@@ -28,7 +31,8 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "g_sat" : 155.73e6, # Saturation slip resistance [Pa]
 "a" : 2.5, # Hardening exponent []
 "h" : 9.34e6, # Hardening matrix [Pa]
-"C_ela" : C_ela,
+"C_ela_2d_voigt" : C_ela_2d_voigt,
+"C_ela_3d": C_ela_3d, #  3 3 3 3
 "C_s": 3070., # reference bulk speed of sound [m/s] 
 "n_IP":4 # integration pts per elem
 }
