@@ -135,8 +135,8 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
         # get g_si
         g_si=g[alpha_i]
         slipRate, schmidTensor,tau_th,tau=calculateSlipRate(F_3D,S_prev_3D,gamma_dot_ref, m, g_si, alpha_i)
-        print("tau",tau)
-        print("tau_th",tau_th)
+        # print("tau",tau)
+        # print("tau_th",tau_th)
         dSlipRatedtau[alpha_i]=gamma_dot_ref / m * (np.abs(tau/tau_th)**(1/m-1.))/tau_th # scalar
 
         # calculate dFpinvdSprev by combining terms above

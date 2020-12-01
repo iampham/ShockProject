@@ -34,6 +34,7 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
 
     F = np.zeros([3,3])
     # 4 - Fixed this should 0:2, not 0:1
+
     F[0:2,0:2] = F_e
     F[2,2] = 1 # TODO changed to 0 for debugging
 
@@ -48,7 +49,7 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
 
     for index in range(10):
 
-        slipRates[index], schmidTensor = calculateSlipRate(F,S3,gamma_dot_ref, m, g_prev[index], index)
+        slipRates[index], schmidTensor,tau_th_s,tau_s = calculateSlipRate(F,S3,gamma_dot_ref, m, g_prev[index], index)
         # print("slipRates[index]",slipRates[index])
         # print("schmidTensor",schmidTensor)
         strainIncrement += slipRates[index] * schmidTensor
