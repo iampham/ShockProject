@@ -173,6 +173,9 @@ def getSlipSystems(index):
 
     return slipDirection, slipPlane
 
+
+
+# ANDREW: Created this function to check for convergence of slip resistance parameters for each slip plane.
 def notConvergedYet(g_prev,g_current, g_tol):
     
     numSlipPlanes = np.shape(g_prev)[0]

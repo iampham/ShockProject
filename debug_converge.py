@@ -72,6 +72,8 @@ x = np.zeros((2))
 
 g_diff = 1
 
+# ANDREW DEBUGGING: Created the g_not_converged flag, Moved g_prev_loc definition from the body of the while
+# loop into the initialization step. 
 g_not_converged = True
 g_prev_loc=g_prev[:,:,ei,ip]
 
