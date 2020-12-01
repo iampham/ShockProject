@@ -55,7 +55,7 @@ F_p_prev_loc=np.eye(2)*0.9
 F_e_prev_loc=np.eye(2)
 F=np.eye(2)*1.1
 g_prev_loc=np.ones([10,1])*1e6
-dt=0.1
+dt=1e-5
 g_prev = np.ones([10,1,8,4])*1e6
 ei=0
 ip=0
@@ -63,8 +63,8 @@ ip=0
 # Slip resistance stop parameter
 g_tol = 1e-5
 # Initialize g_max
-g_max = 0
-g_itermax = 500
+g_max = 1
+g_itermax = 3
 g_iter = 0
 x = np.zeros((2))
 while (np.linalg.norm(g_max)>np.linalg.norm(g_tol) and g_iter<g_itermax):
@@ -115,18 +115,22 @@ while (np.linalg.norm(g_max)>np.linalg.norm(g_tol) and g_iter<g_itermax):
         print("res:",norm_res_S)
 
     #print("S", S_prev)
-        
+    # g_sub
     g_prev_loc=g_prev[:,:,ei,ip]
     F_e_current = F_e_current[0:2,0:2]
 
     F_p_next, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_next)
-    g_prev_loc=g_current
     
+    print("g_current",g_current)
     g_diff = np.abs(g_prev_loc-g_current)
     if np.linalg.norm(g_diff)>np.linalg.norm(g_max):
         g_max = g_diff
 
     g_iter += 1
+    g_prev_loc=g_current
     print("g_iter: ",g_iter)
     print("g_max_norm",np.linalg.norm(g_max))
     print("g_diff_norm", np.linalg.norm(g_diff))
+
+    if np.linalg.norm(g_max) == np.nan:
+        break
