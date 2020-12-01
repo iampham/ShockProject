@@ -57,7 +57,8 @@ def computeSecondPiola(F_e,const_dictionary,v):
     
     return S,S_eos,S_el_voigt,p_eos
 
-def computeSecondPiolaJacobian(S_prev,F_p_prev,F,C_elastic,g,dt,const_dictionary):
+def computeSecondPiolaJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
+    # Assume S,FP,F are 3*3 matrices
     # Parameters we use in function
     Gamma = const_dictionary["Gamma"] # Mie Gruneisen Parameter []
     T = const_dictionary["T"] # Ambient temperature of material [K]
@@ -105,8 +106,7 @@ def computeSecondPiolaJacobian(S_prev,F_p_prev,F,C_elastic,g,dt,const_dictionary
 
     #  F_p_inv_prev to be (3x3)
     dFpinvdDResultantInc = np.zeros([3,3])
-    dFpinvdDResultantInc[:2,:2] = F_p_inv_prev
-    dFpinvdDResultantInc[2,2] = 1
+    dFpinvdDResultantInc = F_p_inv_prev
 
     dDResultantIncdSlipRate = np.zeros([3,3])
     dFpinvdDslip=np.zeros([3,3])
@@ -118,7 +118,7 @@ def computeSecondPiolaJacobian(S_prev,F_p_prev,F,C_elastic,g,dt,const_dictionary
     for alpha_i in range(10):
         dDResultantIncdSlipRate = - getSchmidTensor(alpha_i)
         dtaudSprev = getSchmidTensor(alpha_i)
-        dFpinvdDslip = np.dot(dFpinvdDResultantInc,dDResultantIncdSlipRate[:,:,alpha_i])
+        dFpinvdDslip = np.dot(dFpinvdDResultantInc,dDResultantIncdSlipRate)
 
         # get g_si
         g_si=g[alpha_i]
