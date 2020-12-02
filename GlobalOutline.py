@@ -3,6 +3,7 @@ import numpy as np
 from assembleRRKK import *
 from calculatePlastic import *
 from mat2tens import *
+import csv
 
 # Parameters we use in function
 
@@ -269,3 +270,12 @@ for tIndex in range(1, len(t_vec)):
     # u_current = u_next
     # v_current = v_next
     # a_current = a_next
+
+# TODO: save results in a CSV file
+# try to store
+# node_x for each time step
+# S_all[:,:,:,:,tIndex] = S_next
+# F_all[:,:,:,:,tIndex] = F_next
+# F_e_all[:,:,:,:,tIndex] = F_e_next
+# F_p_all[:,:,:,:,tIndex] = F_p_next
+# g_all
