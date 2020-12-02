@@ -92,7 +92,7 @@ while (g_not_converged and g_iter<g_itermax):
     norm_res_S = 1
     S_iter = 0
     S_tol = 1e-5
-    S_itermax = 10
+    S_itermax = 100
 
     # Solve Stress newton raphson
     while (norm_res_S>S_tol and S_iter<S_itermax):
