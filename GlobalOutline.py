@@ -39,8 +39,8 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 
 # Loop over time steps n 
 timeStart = 0
-timeEnd = 1e-6
-nSteps = 100
+timeEnd = 0.5e-3
+nSteps = 2000
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
 # Calculate the size of the timestep
@@ -49,7 +49,7 @@ deltat = t_vec[1] - t_vec[0]
 # particle vel
 U_p=2000 # 100m/s
 # assuming that the material does not undergo phase transition, Us is linear with Up
-U_s=const_dictionary["C_s"]+const_dictionary["s"]*U_p
+U_s=const_dictionary["C_s"]+const_dictionary["s"]*U_p # page 10 Camilo's report
 # find v1 
 const_dictionary["rho_0"]=1/const_dictionary["v_0"]
 rho_1=const_dictionary["rho_0"]*U_s/(U_s-U_p)
@@ -200,6 +200,7 @@ for tIndex in range(1, len(t_vec)):
 
     # update shock boundary
     shock_bound+=deltat*U_s # TODO Verify this shock boundary is valid
+    print("shock_bound",shock_bound)
 
     # update boudary conditions
     # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
@@ -207,7 +208,7 @@ for tIndex in range(1, len(t_vec)):
         X = node_X[i]
         # but then apply boundary conditions
         if X[0]<=deltat*U_p:
-            node_x[i,0] += deltat*U_p
+            node_x[i,0] += deltat*U_p # at time step 6, t_passed=3e-3,Up=2e3,incr=6
         if X[1]<0.00001: 
             node_x[i,1] = 0.
         # right boundary fixed for all time
@@ -237,13 +238,14 @@ for tIndex in range(1, len(t_vec)):
             node_x[4+i,0] += incr_u[i*2]
             node_x[4+i,1] += incr_u[i*2+1]
         iter +=1
+        
 
     print('NR iterations %i, res %1.7e'%(iter,res))
 
     # Update acceleration
     # MassDampInv = np.linalg.inv(M + deltat/2 * C)
     # a_next = np.dot(MassDampInv, (  RR - deltat/2 * np.dot(C,a_current)) )
-
+    
     # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
     # store in timed var
     # u_vec[:,:,tIndex]=incr_u
@@ -256,11 +258,13 @@ for tIndex in range(1, len(t_vec)):
     F_p_all[:,:,:,:,tIndex] = F_p_next
 
     g_all[:,:,:,:,tIndex] = g_next
-    print("F_next",F_next[:,:,4,0])
-    print("F_e_next",F_e_next[:,:,4,0])
-    print("F_p_next",F_p_next[:,:,4,0])
-    print("S_next",S_next[:,:,4,0])
+    # print("F_next",F_next[:,:,4,0])
+    # print("F_e_next",F_e_next[:,:,4,0])
+    # print("F_p_next",F_p_next[:,:,4,0])
+    # print("S_next",S_next[:,:,4,0])
 
+    F_p_prev=F_p_next
+    g_prev=g_next
     # 
     # u_current = u_next
     # v_current = v_next
