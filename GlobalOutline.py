@@ -3,6 +3,7 @@ import numpy as np
 from assembleRRKK import *
 from calculatePlastic import *
 from mat2tens import *
+import time
 
 # Parameters we use in function
 
@@ -203,6 +204,7 @@ for tIndex in range(1, len(t_vec)):
 
     # update shock boundary
     shock_bound+=deltat*U_s # TODO Verify this shock boundary is valid
+    print("shock_bound",shock_bound)
 
     # update boudary conditions
     # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
@@ -210,7 +212,7 @@ for tIndex in range(1, len(t_vec)):
         X = node_X[i]
         # but then apply boundary conditions
         if X[0]<=deltat*U_p:
-            node_x[i,0] += deltat*U_p
+            node_x[i,0] += deltat*U_p # at time step 6, t_passed=3e-3,Up=2e3,incr=6
         if X[1]<0.00001: 
             node_x[i,1] = 0.
         # right boundary fixed for all time
@@ -240,13 +242,14 @@ for tIndex in range(1, len(t_vec)):
             node_x[4+i,0] += incr_u[i*2]
             node_x[4+i,1] += incr_u[i*2+1]
         iter +=1
+        
 
     print('NR iterations %i, res %1.7e'%(iter,res))
 
     # Update acceleration
     # MassDampInv = np.linalg.inv(M + deltat/2 * C)
     # a_next = np.dot(MassDampInv, (  RR - deltat/2 * np.dot(C,a_current)) )
-
+    
     # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
     # store in timed var
     # u_vec[:,:,tIndex]=incr_u
@@ -259,12 +262,22 @@ for tIndex in range(1, len(t_vec)):
     F_p_all[:,:,:,:,tIndex] = F_p_next
 
     g_all[:,:,:,:,tIndex] = g_next
-    print("F_next",F_next[:,:,4,0])
-    print("F_e_next",F_e_next[:,:,4,0])
-    print("F_p_next",F_p_next[:,:,4,0])
-    print("S_next",S_next[:,:,4,0])
+    # print("F_next",F_next[:,:,4,0])
+    # print("F_e_next",F_e_next[:,:,4,0])
+    # print("F_p_next",F_p_next[:,:,4,0])
+    # print("S_next",S_next[:,:,4,0])
 
+    F_p_prev=F_p_next
+    g_prev=g_next
     # 
     # u_current = u_next
     # v_current = v_next
     # a_current = a_next
+
+
+
+# Saves files in .npz file. To read, just use the command np.load('FEAData.npz'). 
+# The load command will output a dictionary containing all of the data shown here. 
+# To access the data, access it like you would a dictionary. 
+filename = 'FEAData' 
+np.savez(filename, S_all = S_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all)

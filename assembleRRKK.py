@@ -46,7 +46,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
     # g_next global for all elements in mesh
     g_next=np.zeros([10,1,n_elem,n_IP])
     sigma_next=np.zeros([2,2,n_elem,n_IP])
-    S_next=np.zeros([2,2,n_elem,n_IP])
+    S_next_all=np.zeros([2,2,n_elem,n_IP])
     F_next=np.zeros([2,2,n_elem,n_IP])
     F_e_next=np.zeros([2,2,n_elem,n_IP])
     # loop over elements
@@ -111,6 +111,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             F_p_prev_loc = F_p_prev[:,:,ei,ip]
             # calculate F_e from F and F_p
             F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
+            F_e=F_e_prev_loc
             # 2 - Need values for internal functions
             # print("F",F)
             # print("F_p_prev_loc:",F_p_prev_loc)
@@ -126,6 +127,8 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
             while (g_not_converged and g_iter<g_itermax):
                 
+                # TODO Choose the right if statement for Shock boundary after mergin rest of changes (lines 130 to 143)
+                
                 # Pre solve stress
                 # according to the current shockwave boundary and coordinates of ip, update v
                 if 0:
@@ -133,12 +136,11 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                 else:
                     S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
 
-                # Initialize stress residual
-                res_S = 1.
-                norm_res_S = 1
-                S_iter = 0
-                S_tol = 1e-5
-                S_itermax = 1000
+            # according to the current shockwave boundary and coordinates of ip, update v
+            if x[0]<shock_bound:
+                S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v,C_e,C_e_inv,E_e)
+            else:
+                S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0,C_e,C_e_inv,E_e)
 
                 # Solve Stress newton raphson
                 while (norm_res_S>S_tol and S_iter<S_itermax):
@@ -227,7 +229,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             sigma = (1/J)*np.dot(F_e_current,np.dot(S_current,F_e_current.transpose()))
             
             # store results in global variables
-            g_next[:,:,ei,ip] = g_current
+            # g_next[:,:,ei,ip] = g_current
             sigma_next[:,:,ei,ip] = sigma
             S_next[:,:,ei,ip] = S_current
             F_e_next[:,:,ei,ip] = F_e_current
@@ -300,4 +302,4 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                             # assemble into global 
                             KK[node_ei[ni]*2+ci,node_ei[nj]*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)
                             
-    return RR,KK,F_p_next,g_next,S_next,F_e_next,F_next
+    return RR,KK,F_p_next,g_next,S_next_all,F_e_next,F_next

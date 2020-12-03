@@ -1,6 +1,6 @@
 import numpy as np
 from calculatePlastic import * 
-def computeSecondPiola(F_e,const_dictionary,v):
+def computeSecondPiola(F_e,const_dictionary,v,C_e,C_e_inv,E_e):
     # Parameters we use in function
     Gamma = const_dictionary["Gamma"] # Mie Gruneisen Parameter []
     T = const_dictionary["T"] # Ambient temperature of material [K]
@@ -24,13 +24,11 @@ def computeSecondPiola(F_e,const_dictionary,v):
 
     J = np.linalg.det(F_e)
 
-    C_e = np.dot(F_e.transpose(), F_e)
-
-
-
-    I = np.eye(2)
+    # previous implementation according to Camilo's paper
     # print(np.dot(F_e.transpose(), F_e))
-    E_e = 1/2 * (np.dot(F_e.transpose(), F_e) - J**(2/3) * I )
+
+    # deviatoric of E probably not needed
+    # E_e_dev = 1/2 * (np.dot(F_e.transpose(), F_e) - J**(2/3) * I )
 
     
     strainTerm=  E_e - alpha*(T-T_0)
@@ -44,16 +42,48 @@ def computeSecondPiola(F_e,const_dictionary,v):
     S_el[1,1] = S_el_voigt[1]
     S_el[0,1] = S_el_voigt[2] 
     S_el[1,0] = S_el_voigt[2] 
-    
+
+    # from equation 13 of the paper, take 1/3 the trace of S_el matrix
+    # S_el_tr=np.trace(S_el)/3.
 
     chi = 1 - v/v_0
     p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
-    S_eos = -J * p_eos * np.linalg.inv(C_e)
-
-    # TODO : debugging, make eos term 0
-    S_eos=np.zeros([2,2])
+    # print("p_eos 1",Gamma* rho_0 * C_v * (T-T_0)* (v_0/v))
+    # print("P_EOS_2",K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1))
+    # print("C_e",C_e)
+    # print("J",J)
+    S_eos = -J * p_eos * C_e_inv
 
     S=S_el+S_eos  # vis dropped for now
+
+    ################new implementation based on Nicolo's paper###################
+    # delta=3./2. * (J**(2/3.)-1)
+    # strainTerm=  E_e - alpha*(T-T_0)
+    # strainTerm_voigt = np.array([[strainTerm[0,0], strainTerm[1,1], 2*strainTerm[0,1]]])
+    # strainTerm_voigt = strainTerm_voigt.transpose()
+    
+    # # ignored alpha term
+    # alpha_thermal_cauchy=np.zeros([2,2])
+    # a_v=np.trace(alpha)
+    # S_cpl1 = np.dot(C_ela_2d_voigt,(strainTerm_voigt - alpha_thermal_cauchy))
+    # S_cpl2 = K_0*J**(2/3.)*(delta-a_v)*np.linal.inv(C_e)
+    # S_cpl = S_cpl1+S_cpl2
+
+    # chi = 1 - v/v_0
+    # p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
+    # # print("p_eos 1",Gamma* rho_0 * C_v * (T-T_0)* (v_0/v))
+    # # print("P_EOS_2",K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1))
+    # # print("C_e",C_e)
+    # # print("J",J)
+    # S_eos = -J * p_eos * np.linalg.inv(C_e)
+
+
+
+
+    # S = S_eos + S_cpl
+
+    # S_el_voigt=S_cpl1 # same term in previous implmentation
+    #################################################################################
     
     return S,S_eos,S_el_voigt,p_eos
 

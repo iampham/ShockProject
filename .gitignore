@@ -3,3 +3,4 @@ Linearization.xoj
 /__pycache__/*
 /.vscode/*
 *.npz
+FEAData.npz
