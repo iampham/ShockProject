@@ -66,26 +66,20 @@ ei=0
 ip=0
 ############################################
 # Slip resistance stop parameter
-g_tol = 1e-4
-# Initialize g_max
-g_max = 1
-g_itermax = 100
+
+# Slip resistance stop parameter We don't actually use this
+g_tol = 1000
+
+g_itermax = 1
 g_iter = 0
-x = np.zeros((2))
-
-g_diff = 1
-
-# ANDREW DEBUGGING: Created the g_not_converged flag, Moved g_prev_loc definition from the body of the while
-# loop into the initialization step. 
 g_not_converged = True
 g_prev_loc=g_prev[:,:,ei,ip]
-
 
 while (g_not_converged and g_iter<g_itermax):
     
     # Pre solve stress
     # according to the current shockwave boundary and coordinates of ip, update v
-    if 1:
+    if x[0]<shock_bound:
         S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v)
     else:
         S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
@@ -105,15 +99,12 @@ while (g_not_converged and g_iter<g_itermax):
         
         # Residual and Jacobian to compute Next Stress                    
         res_S, J_S, F_e_current = computeSecondPiolaResidualJacobian(S_prev,F_p_prev_loc,F,g_prev_loc,dt,const_dictionary) 
-        #print(J_S)
+
         # compute delta_S and add it to S
-        #delta_S = -np.tensordot(np.linalg.inv(J_S),res_S,axes=2)
-        J_S=J_S[0:2,0:2,0:2,0:2]
+        delta_S = -np.tensordot(np.linalg.inv(J_S),res_S,axes=2)
         res_S=res_S[0:2,0:2]
-        delta_S = -np.tensordot(np.linalg.tensorinv(J_S),res_S,axes=2)
-        # print(delta_S)
-        S_next = S_prev + delta_S[0:2,0:2]
-        S_next = S_next[0:2,0:2] # Go back to 2D
+        S_current = S_prev + delta_S[0:2,0:2]
+        S_current = S_current[0:2,0:2] # Go back to 2D
         # Stop criteria
         norm_res_S = np.linalg.norm(res_S)
 
@@ -123,31 +114,25 @@ while (g_not_converged and g_iter<g_itermax):
         # else:
         #     S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
         # # Iteration to calculate actual split of F=F_p*F_e
-        S_prev=S_next
+
+        S_prev = S_current
         S_iter += 1
-        # print("S_iter: ",S_iter)
-        # print("res:",norm_res_S)
 
-    print("res:", norm_res_S)
-    #print("S", S_prev)
-    # g_sub
-    F_e_current = F_e_current[0:2,0:2]
+        
+    F_p_current, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current)
 
-    F_p_next, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_next)
-    
-    print("g_current",g_current)
-    # g_diff = np.abs(g_prev_loc-g_current)
+    g_diff = np.linalg.abs(g_prev_loc-g_current)
+    if g_diff>g_max:
+        g_max = g_diff
 
-    # g_diff = np.linalg.norm(g_diff)
-    # if g_diff > g_tol:
-    #     g_max = g_diff
 
     g_not_converged = notConvergedYet(g_prev_loc,g_current,g_tol)
     g_iter += 1
+
     g_prev_loc=g_current
     print("g_iter: ",g_iter)
 
-    # print(np.linalg.det(F_p_next))
+        # print(np.linalg.det(F_p_next))
 
     if np.linalg.norm(g_diff) == np.nan:
         break

@@ -214,10 +214,10 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             # Post Solve Stress
 
             # Compute Second Piola Kirchoff
-            E = 0.5*((np.dot(F_e.transpose(),F_e)-np.eye(2))
+            E = 0.5*((np.dot(F_e.transpose(),F_e)-np.eye(2)))
 
             # Compute Cauchy with actual value of elastic deformation
-            J = np.linalg.det(F)  
+            J = np.linalg.det(F)
             sigma = (1/J)*np.dot(F_e_current,np.dot(S_current,F_e_current.transpose()))
             
             # store results in global variables
