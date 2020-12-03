@@ -3,13 +3,13 @@ import time
 def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S):
     
     
-    result_inc, g_next=calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
+    result_inc, g_current=calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
     # print("result_inc, " ,result_inc) # result inc is huge e80 for now
 
 
     F_p_current=np.dot(result_inc,F_p)
 
-    return F_p_current,g_next
+    return F_p_current,g_current
 
 def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,S):
     """ 

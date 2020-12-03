@@ -174,7 +174,6 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                 g_not_converged = notConvergedYet(g_prev_loc,g_current,g_tol)
                 g_iter += 1
-                g_prev_loc = g_current # TODO: Check to see if this line is necessary
 
                 # TODO we are getting a huge F_p (1e80+) and that makes F_e really small
                 # print("F_p_prev_loc",F_p_prev_loc,"gamma_dot_ref",gamma_dot_ref,"m",m, "g_sat",g_sat, "g_prev_loc",g_prev_loc,\
