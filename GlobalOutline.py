@@ -287,4 +287,4 @@ for tIndex in range(1, len(t_vec)):
 # The load command will output a dictionary containing all of the data shown here. 
 # To access the data, access it like you would a dictionary. 
 filename = 'FEAData' 
-np.savez(filename, S_all = S_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps)
+np.savez(filename, S_all = S_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem)

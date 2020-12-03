@@ -12,7 +12,8 @@ g_all = data['g_all']
 timeStart = data['timeStart']
 timeEnd = data['timeEnd']
 nSteps = data['nSteps']
-# TODO do we want to export n_IP and n_elem?
+n_IP = data['n_IP']
+n_elem = data['n_elem']
 
 ################################################
 ########### Choose variables to plot ###########
@@ -20,11 +21,8 @@ nSteps = data['nSteps']
 # Time from Global Outline
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
-# Integration Points from Global Outline #TODO need to export to FEAData.npz if we want
-n_IP = 4
-
-# Element to get data from (Choosing to plot center element) #TODO need to export to FEAData.npz if we want
-elem_plot = 4
+# Element to get data from (Choosing to plot center element)
+elem_plot = 4 # Choose elemnt to plot from n_elem
 
 ################################################
 
