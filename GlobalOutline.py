@@ -40,7 +40,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 # Loop over time steps n 
 timeStart = 0
 timeEnd = 1e-6
-nSteps = 100
+nSteps = 10000
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
 # Calculate the size of the timestep
@@ -50,6 +50,9 @@ deltat = t_vec[1] - t_vec[0]
 U_p=2000 # 100m/s
 # assuming that the material does not undergo phase transition, Us is linear with Up
 U_s=const_dictionary["C_s"]+const_dictionary["s"]*U_p
+# U_s is made faster to increase the simulation speed
+U_s=U_s*10.
+
 # find v1 
 const_dictionary["rho_0"]=1/const_dictionary["v_0"]
 rho_1=const_dictionary["rho_0"]*U_s/(U_s-U_p)

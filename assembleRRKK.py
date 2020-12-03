@@ -34,7 +34,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
     g_sat = const_dictionary["g_sat"]# Saturation slip resistance [Pa]
     a = const_dictionary["a"] # Hardening exponent []
     h = const_dictionary["h"]# Hardening matrix [Pa]
-    C_elastic = const_dictionary["C_ela"]
+    C_ela_2d_voigt = const_dictionary["C_ela_2d_voigt"]
     n_IP=const_dictionary["n_IP"]
 
     # assemble total residual 
@@ -112,7 +112,9 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             # calculate F_e from F and F_p
             F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
             # 2 - Need values for internal functions
+            print("F",F)
 
+            # Slip resistance stop parameter We don't actually use this
             # Slip resistance stop parameter We don't actually use this
             g_tol = 1000
 
@@ -125,7 +127,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                 
                 # Pre solve stress
                 # according to the current shockwave boundary and coordinates of ip, update v
-                if x[0]<shock_bound:
+                if 0:
                     S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v)
                 else:
                     S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
@@ -140,15 +142,18 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                 # Solve Stress newton raphson
                 while (norm_res_S>S_tol and S_iter<S_itermax):
 
-               
+                
                     # according to the current shockwave boundary and coordinates of ip, update v
                     
                     # Residual and Jacobian to compute Next Stress                    
                     res_S, J_S, F_e_current = computeSecondPiolaResidualJacobian(S_prev,F_p_prev_loc,F,g_prev_loc,dt,const_dictionary) 
-
+                    F_e_current=F_e_current[0:2,0:2]
                     # compute delta_S and add it to S
-                    delta_S = -np.tensordot(np.linalg.inv(J_S),res_S,axes=2)
+                    # slice 3d to 2d before the tensordot and increment 
+                    J_S=J_S[0:2,0:2,0:2,0:2]
                     res_S=res_S[0:2,0:2]
+                    delta_S = -np.tensordot(np.linalg.tensorinv(J_S),res_S,axes=2)
+                    
                     S_current = S_prev + delta_S[0:2,0:2]
                     S_current = S_current[0:2,0:2] # Go back to 2D
                     # Stop criteria
@@ -163,13 +168,16 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                     S_prev = S_current
                     S_iter += 1
+                    print("S_iter ",S_iter)
+                    print("res_S",norm_res_S)
+                    # print("S:" , S_current)
 
                     
                 F_p_current, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current)
 
-                g_diff = np.linalg.abs(g_prev_loc-g_current)
-                if g_diff>g_max:
-                    g_max = g_diff
+                g_diff = np.abs(g_prev_loc-g_current)
+                # if g_diff>g_max:
+                #     g_max = g_diff
 
 
                 g_not_converged = notConvergedYet(g_prev_loc,g_current,g_tol)
@@ -187,18 +195,18 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
 
 
-                # J = np.linalg.det(F_e)
+                J = np.linalg.det(F_e_current)
 
-                # C_e = np.dot(F_e.transpose(), F_e)
-                # # special dyadic product of C_e
-                # C_e_inv = np.linalg.inv(C_e)
-                # # C_inv Special Dyad C_inv
-                # dyad_bar = np.zeros([2,2,2,2])
-                # for i in range(2):
-                #     for j in range(2):
-                #         for k in range(2):
-                #             for l in range(2):
-                #                 dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
+                C_e = np.dot(F_e_current.transpose(), F_e_current)
+                # special dyadic product of C_e
+                C_e_inv = np.linalg.inv(C_e)
+                # C_inv Special Dyad C_inv
+                dyad_bar = np.zeros([2,2,2,2])
+                for i in range(2):
+                    for j in range(2):
+                        for k in range(2):
+                            for l in range(2):
+                                dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
 
                 # if x[0]<shock_bound:
                 #     S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v)
@@ -212,9 +220,6 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             # F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
 
             # Post Solve Stress
-
-            # Compute Second Piola Kirchoff
-            E = 0.5*((np.dot(F_e.transpose(),F_e)-np.eye(2)))
 
             # Compute Cauchy with actual value of elastic deformation
             J = np.linalg.det(F)
@@ -239,10 +244,10 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     gradX_v = np.outer(deltav,dNsdX[:,ni])
                     deltaE= 0.5*(np.dot(F.transpose(),gradX_v) + np.dot(gradX_v.transpose(),F))
                     deltaE_voigt = np.array([deltaE[0,0],deltaE[1,1],2*deltaE[0,1]])
-                    Re[ni*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S,deltaE)
+                    Re[ni*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S_current,deltaE)
 
                     # ASSEMBLE INTO GLOBAL RESIDUAL (I didn't ask for this)
-                    RR[node_ei[ni]*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S,deltaE)
+                    RR[node_ei[ni]*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S_current,deltaE)
                     
                     ## 2 more for loops for the increment Delta u
                     for nj in range(4):
@@ -255,28 +260,28 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                             Delta_delta_E_voigt = np.array([[Delta_delta_E[0,0],Delta_delta_E[1,1],2*Delta_delta_E[0,1]]])
                             
-                            Deltaeps = 0.5*(np.dot(gradX_Du.transpose(),F_e) + np.dot(F_e.transpose(),gradX_Du))
+                            Deltaeps = 0.5*(np.dot(gradX_Du.transpose(),F_e_current) + np.dot(F_e_current.transpose(),gradX_Du))
                             
                             ## ELEMENT TANGENT
                             # Initial stress component (also called geometric component) is 
                             # refer to Linearization.pdf
-                            Kgeom = np.tensordot(S,np.dot(gradX_v.transpose(),gradX_Du) + np.dot(gradX_Du.transpose(),gradX_v),axes=2)
+                            Kgeom = np.tensordot(S_current,np.dot(gradX_v.transpose(),gradX_Du) + np.dot(gradX_Du.transpose(),gradX_v),axes=2)
                             # Material component, need to put things in voigt notation for easy computation
                             # deltad_voigt = np.array([deltad[0,0],deltad[1,1],2*deltad[0,1]])
                             
                             # D = np.array([[4*p,2*p,0],[2*p,4*p,0],[0,0,2*p]])
                             Deltaeps_voigt = np.array([Deltaeps[0,0],Deltaeps[1,1],2*Deltaeps[0,1]])
                             # First terms of elastic material part
-                            Kmat_el_1 = np.dot(Deltaeps_voigt,np.dot(C_elastic,deltaE_voigt.transpose()).transpose())     
+                            Kmat_el_1 = np.dot(Deltaeps_voigt,np.dot(C_ela_2d_voigt,deltaE_voigt.transpose()).transpose())     
 
                                     
                             Kmat_el_2 = np.dot(S_el_voigt.transpose(),Delta_delta_E_voigt.transpose())
                             Kmat_el = Kmat_el_1 + Kmat_el_2
-                            # Kmat_el_voigt = np.dot(C_elastic, Deltaeps_voigt)
+                            # Kmat_el_voigt = np.dot(C_ela_2d_voigt, Deltaeps_voigt)
 
                             # First terms of eos part
-                            F_e_inv=np.linalg.inv(F_e)
-                            DC_e=np.dot(gradX_Du.transpose(),F_e) + np.dot(F_e.transpose(),gradX_Du)
+                            F_e_inv=np.linalg.inv(F_e_current)
+                            DC_e=np.dot(gradX_Du.transpose(),F_e_current) + np.dot(F_e_current.transpose(),gradX_Du)
 
                             eos_1 = J*np.tensordot(F_e_inv.transpose(),gradX_Du,axes=2)*C_e_inv
                             eos_2 = J*np.tensordot(dyad_bar,DC_e)
