@@ -53,6 +53,9 @@ v=v_0
 S_prev=np.ones([2,2])
 
 # ANDREW's DEBUGGING SESSION 1: NEED A TINY DEFORMATION GRADIENT, STRESSES ARE GIANT
+############################################
+###### KEEEP THESE FOR DEBUGGING
+############################################
 F_p_prev_loc=np.eye(2)
 F_e_prev_loc=np.eye(2)*.999
 F= np.dot(F_e_prev_loc,F_p_prev_loc)
@@ -61,7 +64,7 @@ dt=1e-10
 g_prev = np.ones([10,1,8,4])*100e6
 ei=0
 ip=0
-
+############################################
 # Slip resistance stop parameter
 g_tol = 1e-4
 # Initialize g_max
