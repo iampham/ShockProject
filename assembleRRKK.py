@@ -112,7 +112,8 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             # calculate F_e from F and F_p
             F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
             # 2 - Need values for internal functions
-            print("F",F)
+            # print("F",F)
+            # print("F_p_prev_loc:",F_p_prev_loc)
 
             # Slip resistance stop parameter We don't actually use this
             # Slip resistance stop parameter We don't actually use this
@@ -174,7 +175,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                     
                 F_p_current, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current)
-
+                # print("F_p_current",F_p_current)
                 g_diff = np.abs(g_prev_loc-g_current)
                 # if g_diff>g_max:
                 #     g_max = g_diff
