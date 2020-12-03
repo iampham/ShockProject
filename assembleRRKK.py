@@ -142,6 +142,13 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             else:
                 S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0,C_e,C_e_inv,E_e)
 
+                # Initialize stress residual
+                res_S = 1.
+                norm_res_S = 1
+                S_iter = 0
+                S_tol = 1e-5
+                S_itermax = 1000
+
                 # Solve Stress newton raphson
                 while (norm_res_S>S_tol and S_iter<S_itermax):
 
