@@ -39,9 +39,10 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 }
 
 # Loop over time steps n 
-timeStart = 0
-timeEnd = 1e-6
-nSteps = 10000
+# TODO: start time changed here
+timeStart = 0.5e-6
+timeEnd =timeStart+ 1e-9
+nSteps = 10
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
 # Calculate the size of the timestep
@@ -52,7 +53,8 @@ U_p=2000 # 100m/s
 # assuming that the material does not undergo phase transition, Us is linear with Up
 U_s=const_dictionary["C_s"]+const_dictionary["s"]*U_p
 # U_s is made faster to increase the simulation speed
-U_s=U_s*10.
+# TODO: U_s changed here
+U_s=U_p*500.
 
 # find v1 
 const_dictionary["rho_0"]=1/const_dictionary["v_0"]
@@ -148,7 +150,7 @@ resultant_increment_prev = np.zeros([2,2])
 # Newton raphson for global problem
 res = 1.
 iter = 0
-tol = 1e-5
+tol = 1e-3
 itermax = 1000
 
 # Initial shock boundary
@@ -203,7 +205,7 @@ for tIndex in range(1, len(t_vec)):
     print("Time Step",tIndex)
 
     # update shock boundary
-    shock_bound+=deltat*U_s # TODO Verify this shock boundary is valid
+    shock_bound=(timeStart+tIndex*deltat)*U_s # TODO Verify this shock boundary is valid
     print("shock_bound",shock_bound)
 
     # update boudary conditions
@@ -225,6 +227,10 @@ for tIndex in range(1, len(t_vec)):
     # v_next = v_current +1/2 * deltat (a_current + a_next)
     # u_next = u_current + deltat*v_current + (deltat)**2/2 *a_current
     
+    # Update prev variables for this time step
+    g_prev=g_all[:,:,:,:,tIndex-1]
+    F_p_prev = F_p_all[:,:,:,:,tIndex-1]
+
     # Newton raphson for global problem
     res = 1
     iter = 0
@@ -242,6 +248,7 @@ for tIndex in range(1, len(t_vec)):
             node_x[4+i,0] += incr_u[i*2]
             node_x[4+i,1] += incr_u[i*2+1]
         iter +=1
+        print("res:",res)
         
 
     print('NR iterations %i, res %1.7e'%(iter,res))
@@ -280,4 +287,4 @@ for tIndex in range(1, len(t_vec)):
 # The load command will output a dictionary containing all of the data shown here. 
 # To access the data, access it like you would a dictionary. 
 filename = 'FEAData' 
-np.savez(filename, S_all = S_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all)
+np.savez(filename, S_all = S_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps)

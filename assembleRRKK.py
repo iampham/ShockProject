@@ -111,12 +111,13 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             F_p_prev_loc = F_p_prev[:,:,ei,ip]
             # calculate F_e from F and F_p
             F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
-            F_e=F_e_prev_loc
-            # 2 - Need values for internal functions
-            # print("F",F)
-            # print("F_p_prev_loc:",F_p_prev_loc)
 
-            # Slip resistance stop parameter We don't actually use this
+            # compute strain variables before interations
+            C_e=np.dot(F_e_prev_loc.transpose(),F_e_prev_loc)
+            C_e_inv=np.linalg.inv(C_e)
+            I = np.eye(2)
+            E_e = 0.5*(C_e-I)
+
             # Slip resistance stop parameter We don't actually use this
             g_tol = 1000
 
@@ -126,21 +127,11 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             g_prev_loc=g_prev[:,:,ei,ip]
 
             while (g_not_converged and g_iter<g_itermax):
-                
-                # TODO Choose the right if statement for Shock boundary after mergin rest of changes (lines 130 to 143)
-                
-                # Pre solve stress
                 # according to the current shockwave boundary and coordinates of ip, update v
-                if 0:
-                    S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v)
+                if x[0]<shock_bound:
+                    S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v,C_e,C_e_inv,E_e)
                 else:
-                    S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
-
-            # according to the current shockwave boundary and coordinates of ip, update v
-            if x[0]<shock_bound:
-                S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v,C_e,C_e_inv,E_e)
-            else:
-                S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0,C_e,C_e_inv,E_e)
+                    S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0,C_e,C_e_inv,E_e)
 
                 # Initialize stress residual
                 res_S = 1.
@@ -178,9 +169,10 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                     S_prev = S_current
                     S_iter += 1
-                    print("S_iter ",S_iter)
-                    print("res_S",norm_res_S)
+                    # print("S_iter ",S_iter)
+                    # print("res_S",norm_res_S)
                     # print("S:" , S_current)
+                    # end of S loop
 
                     
                 F_p_current, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current)
@@ -188,6 +180,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                 g_diff = np.abs(g_prev_loc-g_current)
                 # if g_diff>g_max:
                 #     g_max = g_diff
+                
 
 
                 g_not_converged = notConvergedYet(g_prev_loc,g_current,g_tol)
@@ -202,26 +195,31 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                 # # print("F",F)
                 # # print("F_p",F_p)
                 # # print("F_e",F_e)
+                # end of g loop
 
 
+            # update the variables with new F_e
+            J = np.linalg.det(F_e_current)
+            C_e = np.dot(F_e_current.transpose(), F_e_current)
+            # special dyadic product of C_e
+            C_e_inv = np.linalg.inv(C_e)
+            C_e_inv=np.linalg.inv(C_e)
+            I = np.eye(2)
+            E_e = 0.5*(C_e-I)
 
-                J = np.linalg.det(F_e_current)
 
-                C_e = np.dot(F_e_current.transpose(), F_e_current)
-                # special dyadic product of C_e
-                C_e_inv = np.linalg.inv(C_e)
-                # C_inv Special Dyad C_inv
-                dyad_bar = np.zeros([2,2,2,2])
-                for i in range(2):
-                    for j in range(2):
-                        for k in range(2):
-                            for l in range(2):
-                                dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
+            # C_inv Special Dyad C_inv
+            dyad_bar = np.zeros([2,2,2,2])
+            for i in range(2):
+                for j in range(2):
+                    for k in range(2):
+                        for l in range(2):
+                            dyad_bar[i,j,k,l] = -C_e_inv[i,k]*C_e_inv[j,l] 
 
-                # if x[0]<shock_bound:
-                #     S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v)
-                # else:
-                #     S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v_0)       
+            # if x[0]<shock_bound:
+            #     S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v)
+            # else:
+            #     S,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e,const_dictionary,v_0)       
 
     
             # F_p_current = np.dot(F,np.linalg.inv(F_p))            
@@ -236,9 +234,9 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             sigma = (1/J)*np.dot(F_e_current,np.dot(S_current,F_e_current.transpose()))
             
             # store results in global variables
-            # g_next[:,:,ei,ip] = g_current
+            g_next[:,:,ei,ip] = g_prev_loc
             sigma_next[:,:,ei,ip] = sigma
-            S_next[:,:,ei,ip] = S_current
+            S_next_all[:,:,ei,ip] = S_current
             F_e_next[:,:,ei,ip] = F_e_current
             F_p_next[:,:,ei,ip] = F_p_current
             F_next[:,:,ei,ip] = F

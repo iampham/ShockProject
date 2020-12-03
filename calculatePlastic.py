@@ -70,6 +70,7 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
     return resultant_increment[0:2, 0:2], g_next
 
 def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
+    # everything in this function is 3d
 
     schmidTensor = getSchmidTensor(index)
     ### Need to verify what equation is correct: report or paper ###
@@ -90,8 +91,11 @@ def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
     # print("tau_s",tau_s) # +-e8 or 0 some cases
 
     tau_th_s = getStrengthRatio(index) * g_si
+    # print("tau_th_s",tau_th_s)
+    # print("g_si",g_si)
     slipRate = gamma_dot_ref * np.sign(tau_s) * np.abs(tau_s/tau_th_s)**(1/m)
-
+    if np.isnan(slipRate):
+        time.sleep(100)
     
     #print("slipRate",slipRate) # sliprate is huge e80 for now
     # input("press enter")
