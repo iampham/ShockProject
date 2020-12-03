@@ -113,14 +113,15 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
             # 2 - Need values for internal functions
 
-            # Slip resistance stop parameter
-            g_tol = 1e-5
-            # Initialize g_max
-            g_max = 1
-            g_itermax = 1000
-            g_iter = 0
+            # Slip resistance stop parameter We don't actually use this
+            g_tol = 1000
 
-            while (g_max>g_tol and g_iter<g_itermax):
+            g_itermax = 1
+            g_iter = 0
+            g_not_converged = True
+            g_prev_loc=g_prev[:,:,ei,ip]
+
+            while (g_not_converged and g_iter<g_itermax):
                 
                 # Pre solve stress
                 # according to the current shockwave boundary and coordinates of ip, update v
@@ -147,8 +148,9 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                     # compute delta_S and add it to S
                     delta_S = -np.tensordot(np.linalg.inv(J_S),res_S,axes=2)
-                    S_next = S_prev + delta_S
-                    S_next = S_next[0:2,0:2] # Go back to 2D
+                    res_S=res_S[0:2,0:2]
+                    S_current = S_prev + delta_S[0:2,0:2]
+                    S_current = S_current[0:2,0:2] # Go back to 2D
                     # Stop criteria
                     norm_res_S = np.linalg.norm(res_S)
 
@@ -159,17 +161,20 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     #     S_prev,S_eos,S_el_voigt,p_eos=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0)
                     # # Iteration to calculate actual split of F=F_p*F_e
 
+                    S_prev = S_current
                     S_iter += 1
 
                     
-                g_prev_loc=g_prev[:,:,ei,ip]
-                F_p_next, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_next)
+                F_p_current, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current)
 
                 g_diff = np.linalg.abs(g_prev_loc-g_current)
                 if g_diff>g_max:
                     g_max = g_diff
 
+
+                g_not_converged = notConvergedYet(g_prev_loc,g_current,g_tol)
                 g_iter += 1
+                g_prev_loc = g_current # TODO: Check to see if this line is necessary
 
                 # TODO we are getting a huge F_p (1e80+) and that makes F_e really small
                 # print("F_p_prev_loc",F_p_prev_loc,"gamma_dot_ref",gamma_dot_ref,"m",m, "g_sat",g_sat, "g_prev_loc",g_prev_loc,\
@@ -214,14 +219,14 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
             # Compute Cauchy with actual value of elastic deformation
             J = np.linalg.det(F)  
-            sigma = (1/J)*np.dot(F_e_current,np.dot(S_next,F_e_current.transpose()))
+            sigma = (1/J)*np.dot(F_e_current,np.dot(S_current,F_e_current.transpose()))
             
             # store results in global variables
             g_next[:,:,ei,ip] = g_current
             sigma_next[:,:,ei,ip] = sigma
-            S_next[:,:,ei,ip] = S_next
+            S_next[:,:,ei,ip] = S_current
             F_e_next[:,:,ei,ip] = F_e_current
-            F_p_next[:,:,ei,ip] = F_p_prev_loc
+            F_p_next[:,:,ei,ip] = F_p_current
             F_next[:,:,ei,ip] = F
 
             # compute the variation of the symmetric velocity gradient by moving one node and one component

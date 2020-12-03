@@ -7,9 +7,9 @@ def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
     # print("result_inc, " ,result_inc) # result inc is huge e80 for now
 
 
-    F_p_next=np.dot(result_inc,F_p)
+    F_p_current=np.dot(result_inc,F_p)
 
-    return F_p_next,g_next
+    return F_p_current,g_next
 
 def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,S):
     """ 
@@ -34,11 +34,11 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
     
     """ 
 
-    F = np.zeros([3,3])
+    F_e_3 = np.zeros([3,3])
     # 4 - Fixed this should 0:2, not 0:1
 
-    F[0:2,0:2] = F_e
-    F[2,2] = 1 # TODO changed to 0 for debugging
+    F_e_3[0:2,0:2] = F_e
+    F_e_3[2,2] = 1 # TODO changed to 0 for debugging
 
 
     S3 = np.zeros([3,3])
@@ -51,10 +51,10 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
 
     for index in range(10):
 
-        slipRates[index], schmidTensor,tau_th_s,tau_s = calculateSlipRate(F,S3,gamma_dot_ref, m, g_prev[index], index)
+        slipRates[index], schmidTensor,tau_th_s,tau_s = calculateSlipRate(F_e_3,S3,gamma_dot_ref, m, g_prev[index], index)
         # print("slipRates[index]",slipRates[index])
         # print("schmidTensor",schmidTensor)
-        strainIncrement += slipRates[index] * schmidTensor
+        strainIncrement += slipRates[index] * dt* schmidTensor
     
     resultant_increment=np.zeros([3,3])
     for i in range(3):

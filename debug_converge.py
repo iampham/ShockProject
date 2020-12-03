@@ -50,7 +50,7 @@ h = const_dictionary["h"]# Hardening matrix [Pa]
 C_ela_2d_voigt = const_dictionary["C_ela_2d_voigt"]
 C_ela_3d=const_dictionary["C_ela_3d"]
 v=v_0
-S_prev=np.ones([2,2])*1000
+S_prev=np.ones([2,2])
 
 # ANDREW's DEBUGGING SESSION 1: NEED A TINY DEFORMATION GRADIENT, STRESSES ARE GIANT
 F_p_prev_loc=np.eye(2)
@@ -92,7 +92,7 @@ while (g_not_converged and g_iter<g_itermax):
     norm_res_S = 1
     S_iter = 0
     S_tol = 1e-5
-    S_itermax = 10
+    S_itermax = 1000
 
     # Solve Stress newton raphson
     while (norm_res_S>S_tol and S_iter<S_itermax):
@@ -125,6 +125,7 @@ while (g_not_converged and g_iter<g_itermax):
         # print("S_iter: ",S_iter)
         # print("res:",norm_res_S)
 
+    print("res:", norm_res_S)
     #print("S", S_prev)
     # g_sub
     F_e_current = F_e_current[0:2,0:2]
