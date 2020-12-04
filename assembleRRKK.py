@@ -280,19 +280,20 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                             # D = np.array([[4*p,2*p,0],[2*p,4*p,0],[0,0,2*p]])
                             Deltaeps_voigt = np.array([Deltaeps[0,0],Deltaeps[1,1],2*Deltaeps[0,1]])
                             # First terms of elastic material part
-                            Kmat_el_1 = np.dot(Deltaeps_voigt,np.dot(C_ela_2d_voigt,deltaE_voigt.transpose()).transpose())     
+                            Kmat_el_1 = np.dot(Deltaeps_voigt,np.dot(C_ela_2d_voigt,deltaE_voigt.transpose()).transpose())   
 
                                     
-                            Kmat_el_2 = np.dot(S_el_voigt.transpose(),Delta_delta_E_voigt.transpose())
+                            Kmat_el_2 = np.dot(S_el_voigt.transpose(),Delta_delta_E_voigt.transpose()) 
                             Kmat_el = Kmat_el_1 + Kmat_el_2
                             # Kmat_el_voigt = np.dot(C_ela_2d_voigt, Deltaeps_voigt)
 
                             # First terms of eos part
                             F_e_inv=np.linalg.inv(F_e_current)
-                            DC_e=np.dot(gradX_Du.transpose(),F_e_current) + np.dot(F_e_current.transpose(),gradX_Du)
+                            # DC_e=np.dot(gradX_Du.transpose(),F_e_current) + np.dot(F_e_current.transpose(),gradX_Du) # This is the same Delta delta E
 
                             eos_1 = J*np.tensordot(F_e_inv.transpose(),gradX_Du,axes=2)*C_e_inv
-                            eos_2 = J*np.tensordot(dyad_bar,DC_e)
+                            # eos_2 = J*np.tensordot(dyad_bar,DC_e) # Using Delta delta E instead
+                            eos_2 = J*np.tensordot(dyad_bar,Delta_delta_E_voigt)
                             Kmat_eos_1 = -p_eos*np.tensordot(eos_1+eos_2,deltaE,axes=2)
                             Kmat_eos_2 = np.tensordot(S_eos,Delta_delta_E,axes=2)
                             Kmat_eos = Kmat_eos_1 + Kmat_eos_2
