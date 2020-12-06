@@ -47,7 +47,7 @@ def computeSecondPiola(F_e,const_dictionary,v,C_e,C_e_inv,E_e):
     # from equation 13 of the paper, take 1/3 the trace of S_el matrix
     # S_el_tr=np.trace(S_el)/3.
 
-    chi = 1 - v/v_0
+    # chi = 1 - v/v_0
     # p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
     # print("p_eos 1",Gamma* rho_0 * C_v * (T-T_0)* (v_0/v))
     # print("P_EOS_2",K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1))
@@ -108,6 +108,7 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     a = const_dictionary["a"] # Hardening exponent []
     h = const_dictionary["h"]# Hardening matrix [Pa]
     C_ela_2d_voigt = const_dictionary["C_ela_2d_voigt"]
+    C_ela_2d=const_dictionary["C_ela_2d"]
     C_ela_3d=const_dictionary["C_ela_3d"]
 
     # Go to 3D
@@ -118,15 +119,22 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     F_3D = np.eye(3)
     F_3D[0:2,0:2] = F
 
+
     # Plastic deformation inverse
     F_p_inv_prev = np.linalg.inv(F_p_prev_3D)
     # Elastic deformation gradient
     F_e_prev = np.dot(F_3D,F_p_inv_prev)
+    # print("F",F)
+    # print("F_e_prev",F_e_prev)
+    # time.sleep(3)
 
     # Compute Second Piola Kirchoff Residual
     S_prime = np.tensordot(C_ela_3d,0.5*(np.dot(F_e_prev.transpose(),F_e_prev)-np.eye(3)),axes=2)
-    # print(S_prime)
-    res_S = S_prev_3D - S_prime
+    # print("should be zero",0.5*(np.dot(F_e_prev.transpose(),F_e_prev)-np.eye(3)))
+    # print("S_prev_3D",S_prev_3D)
+    # print("S_prime",S_prime)
+    # time.sleep(3)
+    res_S = S_prev_3D[0:2,0:2] - S_prime[0:2,0:2]
 
     def KronDel(m,n):
         if m==n:
@@ -167,19 +175,31 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
 
         # get g_si
         g_si=g[alpha_i]
+       
         slipRate, schmidTensor,tau_th,tau=calculateSlipRate(F_3D,S_prev_3D,gamma_dot_ref, m, g_si, alpha_i)
         # print("tau",tau)
         # print("tau_th",tau_th)
+        # print("slipRate",slipRate)
         dSlipRatedtau[alpha_i]=gamma_dot_ref / m * (np.abs(tau/tau_th)**(1/m-1.))/tau_th # scalar
+        # print("dSlipRatedtau[alpha_i]",dSlipRatedtau[alpha_i])
 
         # calculate dFpinvdSprev by combining terms above
         dFpinvdSprev += np.tensordot(dFpinvdDslip * dSlipRatedtau[alpha_i] * dt, dtaudSprev,axes=0)
 
-    
+    # print("dEedFe",dEedFe)
+    # print("dFedFpinv",dFedFpinv)
+    # print("dFpinvdSprev",dFpinvdSprev)
+    # input()
     # Compute Second Piola Kirchoff tangent
     S_tangent = np.tensordot(dEedFe,np.tensordot(dFedFpinv,dFpinvdSprev,axes=2),axes=2)
+    
+    # print("S_tangent_norm",np.linalg.norm(S_tangent))
 
     # Jacobian of Second Piola Kirchoff
-    J_S = II- np.tensordot(C_ela_3d,S_tangent,axes=2)
+    # J_S = II- np.tensordot(C_ela_3d,S_tangent,axes=2)
 
+    # 2D
+    II=II[0:2,0:2,0:2,0:2]
+    J_S = II- np.tensordot(C_ela_2d,S_tangent[0:2,0:2,0:2,0:2],axes=2)
+    # print("J_S",J_S)
     return res_S, J_S, F_e_prev

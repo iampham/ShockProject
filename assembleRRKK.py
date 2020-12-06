@@ -2,7 +2,7 @@ import numpy as np
 from calculatePlastic import * 
 from computeSecondPiola import *
 
-def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt,shock_bound):
+def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt):
     """
     INPUTS: State & Material parameters to the equation:
         - Gamma: Mie Gruneisen Parameter
@@ -130,10 +130,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
             while (g_not_converged and g_iter<g_itermax):
                 # according to the current shockwave boundary and coordinates of ip, update v
-                if x[0]<shock_bound:
-                    S_prev,S_eos,S_el_voigt=computeSecondPiola(F_e_prev_loc,const_dictionary,v,C_e,C_e_inv,E_e)
-                else:
-                    S_prev,S_eos,S_el_voigt=computeSecondPiola(F_e_prev_loc,const_dictionary,v_0,C_e,C_e_inv,E_e)
+                S_prev,S_eos,S_el_voigt=computeSecondPiola(F_e_prev_loc,const_dictionary,v,C_e,C_e_inv,E_e)
 
                 # Initialize stress residual
                 res_S = 1.
@@ -154,6 +151,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     # compute delta_S and add it to S
                     # slice 3d to 2d before the tensordot and increment 
                     J_S=J_S[0:2,0:2,0:2,0:2]
+                    # print("J_S",J_S)
                     res_S=res_S[0:2,0:2]
                     delta_S = -np.tensordot(np.linalg.tensorinv(J_S),res_S,axes=2)
                     
@@ -173,6 +171,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     S_iter += 1
                     # print("S_iter ",S_iter)
                     # print("res_S",norm_res_S)
+                    # print(norm_res_S>S_tol)
                     # print("S:" , S_current)
                     # end of S loop
 
@@ -187,6 +186,8 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                 g_not_converged = notConvergedYet(g_prev_loc,g_current,g_tol)
                 g_iter += 1
+                # print("g_iter",g_iter)
+                # print("g_condition",g_iter<g_itermax)
 
                 # TODO we are getting a huge F_p (1e80+) and that makes F_e really small
                 # print("F_p_prev_loc",F_p_prev_loc,"gamma_dot_ref",gamma_dot_ref,"m",m, "g_sat",g_sat, "g_prev_loc",g_prev_loc,\
@@ -200,7 +201,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                 # end of g loop
 
             S_elastic = S_current
-
+            # print("outside")
             F_p_inv = np.linalg.inv(F_p_current)
             F_p_invT = F_p_inv.transpose()
             S_all = np.dot(F_p_inv,np.dot(S_elastic, F_p_invT))
@@ -316,17 +317,21 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                             # F_p_dyad_down = specialDyadDown(F_p_current, F_p_current)
 
                             #### Part 1 of material stiffness
-                            dSdC = np.tensordot(F_p_inv_up, F_p_invT_up, axes = 2)
+                            dSdC = np.tensordot(F_p_inv_up, np.tensordot(C_ela,F_p_invT_up, axes = 2), axes = 2)
+                            # print("dSdC_norm",np.linalg.norm(dSdC))
+                            
 
                             #### Part 2 of material stiffness 
                             dSdFp = -(F_p_inv_up_S + S_all_down_F_p_inv) - np.tensordot((F_p_inv_up), \
                                             np.tensordot(0.5*C_ela, F_p_invT_down_C_e + C_e_up_F_p_invT, axes =2),  axes = 2)
-                            
+                            # print("dSdFp_norm",np.linalg.norm(dSdFp))
 
                             dFpdSe = calcDFpDSe(dt,  F_p_current, gamma_dot_ref, g_current,m, S_elastic)
-
+                            # print("dFpdSe_norm",np.linalg.norm(dFpdSe))
                             dSedCe = 0.5 *C_ela
+                            # print("dSedCe_norm",np.linalg.norm(dSedCe))
                             dCedC = np.tensordot(F_p_invT, F_p_inv, axes = 0) 
+                            # print("dCedC_norm",np.linalg.norm(dCedC))
                             
 
                             bigdaddy = np.tensordot(dSdFp, \
@@ -335,7 +340,8 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                             
                             bigC = 2 * dSdC + 2 * bigdaddy 
-                            
+                            # print("bigdaddy_norm",np.linalg.norm(bigdaddy))
+                            # input()
                             Kmat = np.tensordot(Deltaeps,\
                                         np.tensordot(bigC, deltaE, axes = 2), axes = 2)
                             

@@ -8,17 +8,41 @@ import time
 # Parameters we use in function
 
 # Elastic Tensor CC # TODO verify 
-C_ela_3d_voigt = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
-                      [10.18,20.34,13.35,0.23,6.96,0.14],\
-                      [9.77,13.35,21.27,-0.004,5.01,0.19],\
-                      [0.058,0.23,-0.004,8.79,0.32,4.16],\
-                      [4.05,6.96,5.01,0.32,6.20,0.22],\
-                      [-0.18,0.14,0.19,4.16,0.22,10.00]]) # elasticity tensor for a 3D problem
-C_ela_2d_voigt = C_ela_3d_voigt[0:3,0:3] # Elasticity tensor for a 2D problem
+# C_ela_3d_voigt = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
+#                       [10.18,20.34,13.35,0.23,6.96,0.14],\
+#                       [9.77,13.35,21.27,-0.004,5.01,0.19],\
+#                       [0.058,0.23,-0.004,8.79,0.32,4.16],\
+#                       [4.05,6.96,5.01,0.32,6.20,0.22],\
+#                       [-0.18,0.14,0.19,4.16,0.22,10.00]]) # elasticity tensor for a 3D problem
+# C_ela_2d_voigt = C_ela_3d_voigt[0:3,0:3] # Elasticity tensor for a 2D problem
+
+# Isotropic tensor
+# material parameters of beta-HMX from 
+# Effect of initial damage variability on hot-spot nucleation in energetic materials
+# Camilo A. Duarte, Nicolò Grilli, and Marisol Koslowski
+E=25.12e9 
+nu=0.24
+C_ela_3d_voigt =np.zeros([6,6])
+C_ela_3d_voigt[0,0]=E*(1-nu)/((1+nu)*(1-2*nu))
+C_ela_3d_voigt[1,1]=E*(1-nu)/((1+nu)*(1-2*nu))
+C_ela_3d_voigt[2,2]=E*(1-nu)/((1+nu)*(1-2*nu))
+C_ela_3d_voigt[3,3]=E/(2*(1+nu))
+C_ela_3d_voigt[4,4]=E/(2*(1+nu))
+C_ela_3d_voigt[5,5]=E/(2*(1+nu))
+C_ela_3d_voigt[0,1]=E*nu/((1+nu)*(1-2*nu))
+C_ela_3d_voigt[0,2]=E*nu/((1+nu)*(1-2*nu))
+C_ela_3d_voigt[1,2]=E*nu/((1+nu)*(1-2*nu))
+C_ela_3d_voigt[1,0]=E*nu/((1+nu)*(1-2*nu))
+C_ela_3d_voigt[2,0]=E*nu/((1+nu)*(1-2*nu))
+C_ela_3d_voigt[2,1]=E*nu/((1+nu)*(1-2*nu))
+
+
 
 C_ela_3d = mat2tens(C_ela_3d_voigt) #  3 3 3 3
 C_ela_2d = C_ela_3d[0:2,0:2,0:2,0:2]
-
+C_ela_2d_voigt=np.zeros([3,3])
+C_ela_2d_voigt[0:2,0:2] = C_ela_3d_voigt[0:2,0:2] 
+C_ela_2d_voigt[2,2] = C_ela_3d_voigt[3,3]
 const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "T" : 300., # TODO ARBITRARY VALUE FOR NOW Ambient temperature of material [K]
 "T_0" : 300., # Reference temperature of material [K]
@@ -42,7 +66,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 
 # Loop over time steps n 
 # TODO: start time changed here
-timeStart = 0.5e-6
+timeStart = 0.
 timeEnd =timeStart+ 1e-9
 nSteps = 10
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
@@ -55,19 +79,13 @@ U_p=2000 # 100m/s
 # assuming that the material does not undergo phase transition, Us is linear with Up
 U_s=const_dictionary["C_s"]+const_dictionary["s"]*U_p
 # U_s is made faster to increase the simulation speed
-# TODO: U_s changed here
-U_s=U_p*500.
+
 
 # find v1 
 const_dictionary["rho_0"]=1/const_dictionary["v_0"]
 rho_1=const_dictionary["rho_0"]*U_s/(U_s-U_p)
 v1=1/rho_1
 const_dictionary["v"]=v1 
-
-# shock related variables initialization
-# Y coordinate of boundary line of shocked and unshocked region
-shock_bound=0
-
 
 # Initialize mesh
 n_nodes = 8
@@ -83,8 +101,8 @@ for i in range(n_nodes):
     # first initialize with the same as original
     node_x[i] = X
     # but then apply boundary conditions
-    if X[0]<=deltat*U_p:
-        node_x[i,0] += deltat*U_p #
+    if X[0]<=0.00001:
+        node_x[i,0] = 0. #known displacement, no more shocks
     if X[1]<0.00001: 
         node_x[i,1] = 0.
     if X[0]>0.9999: 
@@ -155,15 +173,14 @@ iter = 0
 tol = 1e-3
 itermax = 1000
 
-# Initial shock boundary
-shock_bound = 0 
+
 
 print("Time Step 0")
 
 # newton raphson for initial time step
 while(res>tol and iter<itermax):
 
-    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,shock_bound)
+    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
 
     RRdof= RR[8:]
     KKdof = KK[8:, 8:]
@@ -180,6 +197,8 @@ while(res>tol and iter<itermax):
         node_x[4+i,0] += incr_u[i*2]
         node_x[4+i,1] += incr_u[i*2+1]
     iter +=1
+    print("res:",res)
+    print("incr_u",incr_u)
 
 print('NR iterations %i, res %1.7e'%(iter,res))
 
@@ -206,17 +225,13 @@ for tIndex in range(1, len(t_vec)):
 
     print("Time Step",tIndex)
 
-    # update shock boundary
-    shock_bound=(timeStart+tIndex*deltat)*U_s # TODO Verify this shock boundary is valid
-    print("shock_bound",shock_bound)
-
     # update boudary conditions
     # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
     for i in range(n_nodes):
         X = node_X[i]
         # but then apply boundary conditions
-        if X[0]<=deltat*U_p:
-            node_x[i,0] += deltat*U_p # at time step 6, t_passed=3e-3,Up=2e3,incr=6
+        if X[0]<0.00001:
+            node_x[i,0] =0. # TODO: make a time dependent BC
         if X[1]<0.00001: 
             node_x[i,1] = 0.
         # right boundary fixed for all time
@@ -238,7 +253,7 @@ for tIndex in range(1, len(t_vec)):
     iter = 0
     while(res>tol and iter<itermax):
 
-        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,shock_bound)
+        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
 
         RRdof= RR[8:]
         KKdof = KK[8:, 8:]
@@ -251,6 +266,7 @@ for tIndex in range(1, len(t_vec)):
             node_x[4+i,1] += incr_u[i*2+1]
         iter +=1
         print("res:",res)
+        print("incr_u",incr_u)
         
 
     print('NR iterations %i, res %1.7e'%(iter,res))
