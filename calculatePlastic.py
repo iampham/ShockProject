@@ -5,10 +5,11 @@ def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
     
     result_inc, g_current=calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
     # print("result_inc, " ,result_inc) # result inc is huge e80 for now
-
+    # TODO experimenting
+    # result_inc*=2
 
     F_p_current=np.dot(result_inc,F_p)
-
+    # print(F_p_current,"F_p_current")
     return F_p_current,g_current
 
 def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,S):
@@ -114,8 +115,20 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
     for i in range(10):
         # Andrew's debugging: the next resistance must take into account the slip from all slip planes.
         for j in range(10):
+            if g_prev[j]>g_sat:
+                print("g_prev",g_prev)
+                print("g_sat",g_sat)
+
 
             g_dot[i] += h * (1-g_prev[j]/g_sat)**a * slipRates[j]
+
+
+            
+            if g_dot[i]==np.nan:
+                print("g_prev[j]",g_prev[j])
+                # print("g_sat",g_sat)
+                print("slipRates",slipRates)
+
 
     # Time discretization of ODE
     g_current = g_prev + dt*g_dot
@@ -216,7 +229,7 @@ def notConvergedYet(g_prev,g_current, g_tol):
         diff = np.abs(g_prev[i] - g_current[i])
 
         if diff > (np.abs(g_prev[i])*g_tol):
-            print('Comparison',g_prev[i],g_current[i])
+            # print('Comparison',g_prev[i],g_current[i])
             return True
 
 

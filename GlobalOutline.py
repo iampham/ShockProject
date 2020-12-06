@@ -56,7 +56,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "alpha" : np.array([[1,0],[0,1]]), # TODO NEED RIGHT TENSOR hermal expansion tensor []
 "gamma_dot_ref" : 0.001e9, # Reference slip rate [s^-1]
 "m" : 0.1, # Slip rate exponent []
-"g_sat" : 155.73e6, # Saturation slip resistance [Pa]
+"g_sat" : 155.73e3, # Saturation slip resistance [Pa] was e6
 "a" : 2.5, # Hardening exponent []
 "h" : 9.34e6, # Hardening matrix [Pa]
 "C_ela_2d_voigt" : C_ela_2d_voigt,
@@ -70,7 +70,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 # TODO: start time changed here
 timeStart = 0.
 timeEnd =timeStart+ 0.5
-nSteps = 10
+nSteps = 1000
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
 # Calculate the size of the timestep
@@ -142,7 +142,7 @@ F_p_all = np.zeros([2,2,n_elem,n_IP,nSteps])
 g_all = np.zeros([10,1,n_elem,n_IP,nSteps])
 
 # Intitial condition of hardening
-g_all[:,:,:,:,0] =103.03e6 * np.ones([10,1,n_elem,n_IP]) # 1e7 times smaller than g_dot_ref?
+g_all[:,:,:,:,0] =103.03e3 * np.ones([10,1,n_elem,n_IP]) # 1e7 times smaller than g_dot_ref?
 
 # Initialize first guess for plastic deformation gradient
 for i_elem in range(n_elem):

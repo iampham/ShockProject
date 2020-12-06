@@ -208,6 +208,9 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             F_p_inv = np.linalg.inv(F_p_current)
             F_p_invT = F_p_inv.transpose()
             S_all = np.dot(F_p_inv,np.dot(S_elastic, F_p_invT))
+            print("F_p_inv",F_p_inv)
+            print("S_elastic",S_elastic)
+            print("S_all",S_all)
 
             S_all_voigt = np.zeros([1,3])
             S_all_voigt[0,0] = S_all[0,0]
