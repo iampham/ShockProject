@@ -102,7 +102,7 @@ for i in range(n_nodes):
     node_x[i] = X
     # but then apply boundary conditions
     if X[0]<=0.00001:
-        node_x[i,0] = 0. #known displacement, no more shocks
+        node_x[i,0] = 0.001 #known displacement, no more shocks
     if X[1]<0.00001: 
         node_x[i,1] = 0.
     if X[0]>0.9999: 
@@ -231,7 +231,7 @@ for tIndex in range(1, len(t_vec)):
         X = node_X[i]
         # but then apply boundary conditions
         if X[0]<0.00001:
-            node_x[i,0] =0. # TODO: make a time dependent BC
+            node_x[i,0] =0.001 # TODO: make a time dependent BC
         if X[1]<0.00001: 
             node_x[i,1] = 0.
         # right boundary fixed for all time
