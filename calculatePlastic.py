@@ -177,9 +177,9 @@ def getSlipSystems(index):
 
     return slipDirection, slipPlane
 
-def calcDFpDSe(dt,  F_p_current, gamma_dot_ref, g_current,m, S_elastic):
+def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic):
     Fp = np.zeros([3,3])
-    Fp[0:2,0:2] = F_p_current
+    Fp[0:2,0:2] = F_p_prev
     Fp[2,2] = 1
 
     S_e = np.zeros([3,3])

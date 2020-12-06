@@ -32,6 +32,9 @@ def computeSecondPiola(F_e,const_dictionary,v,C_e,C_e_inv,E_e):
 
     
     strainTerm=  E_e - alpha*(T-T_0)
+
+    # print('E', np.linalg.norm(E_e))
+
     strainTerm_voigt = np.array([[strainTerm[0,0], strainTerm[1,1], 2*strainTerm[0,1]]])
     strainTerm_voigt = strainTerm_voigt.transpose()
     

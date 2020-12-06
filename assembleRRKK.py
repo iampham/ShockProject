@@ -128,6 +128,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             g_not_converged = True
             g_prev_loc=g_prev[:,:,ei,ip]
 
+
             while (g_not_converged and g_iter<g_itermax):
                 # according to the current shockwave boundary and coordinates of ip, update v
                 S_prev,S_eos,S_el_voigt=computeSecondPiola(F_e_prev_loc,const_dictionary,v,C_e,C_e_inv,E_e)
@@ -159,6 +160,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     S_current = S_current[0:2,0:2] # Go back to 2D
                     # Stop criteria
                     norm_res_S = np.linalg.norm(res_S)
+
 
                     # # TODO Need to add shock condition to next guess of S_prev
                     # if x[0]<shock_bound:
@@ -201,6 +203,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                 # end of g loop
 
             S_elastic = S_current
+
             # print("outside")
             F_p_inv = np.linalg.inv(F_p_current)
             F_p_invT = F_p_inv.transpose()
@@ -279,6 +282,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                     # ASSEMBLE INTO GLOBAL RESIDUAL (I didn't ask for this)
                     RR[node_ei[ni]*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S_all,deltaE)
+
                     
                     ## 2 more for loops for the increment Delta u
                     for nj in range(4):
@@ -319,16 +323,17 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                             #### Part 1 of material stiffness
                             dSdC = np.tensordot(F_p_inv_up, np.tensordot(C_ela,F_p_invT_up, axes = 2), axes = 2)
                             # print("dSdC_norm",np.linalg.norm(dSdC))
+                            # print("Fpinvt", np.linalg.norm(F_p_inv_up))
                             
 
                             #### Part 2 of material stiffness 
                             dSdFp = -(F_p_inv_up_S + S_all_down_F_p_inv) - np.tensordot((F_p_inv_up), \
-                                            np.tensordot(0.5*C_ela, F_p_invT_down_C_e + C_e_up_F_p_invT, axes =2),  axes = 2)
+                                            np.tensordot(0.5*C_ela, F_p_invT_down_C_e + C_e_up_F_p_invT, axes =2),  axes = 2) # large term 
                             # print("dSdFp_norm",np.linalg.norm(dSdFp))
 
-                            dFpdSe = calcDFpDSe(dt,  F_p_current, gamma_dot_ref, g_current,m, S_elastic)
+                            dFpdSe = calcDFpDSe(dt,  F_p_prev_loc, gamma_dot_ref, g_current,m, S_elastic)
                             # print("dFpdSe_norm",np.linalg.norm(dFpdSe))
-                            dSedCe = 0.5 *C_ela
+                            dSedCe = 0.5 *C_ela # large term
                             # print("dSedCe_norm",np.linalg.norm(dSedCe))
                             dCedC = np.tensordot(F_p_invT, F_p_inv, axes = 0) 
                             # print("dCedC_norm",np.linalg.norm(dCedC))
@@ -339,9 +344,11 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                                                 np.tensordot(dSedCe, dCedC, axes = 2), axes = 2), axes =2)
 
                             
+                            # print( "dCedC",  np.linalg.norm(dCedC))
+
                             bigC = 2 * dSdC + 2 * bigdaddy 
                             # print("bigdaddy_norm",np.linalg.norm(bigdaddy))
-                            # input()
+
                             Kmat = np.tensordot(Deltaeps,\
                                         np.tensordot(bigC, deltaE, axes = 2), axes = 2)
                             
