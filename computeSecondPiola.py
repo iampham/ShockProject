@@ -43,18 +43,21 @@ def computeSecondPiola(F_e,const_dictionary,v,C_e,C_e_inv,E_e):
     S_el[0,1] = S_el_voigt[2] 
     S_el[1,0] = S_el_voigt[2] 
 
+
     # from equation 13 of the paper, take 1/3 the trace of S_el matrix
     # S_el_tr=np.trace(S_el)/3.
 
     chi = 1 - v/v_0
-    p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
+    # p_eos = Gamma* rho_0 * C_v * (T-T_0)* (v_0/v) + K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1)
     # print("p_eos 1",Gamma* rho_0 * C_v * (T-T_0)* (v_0/v))
     # print("P_EOS_2",K_0*chi/(1-s*chi)**2 * (Gamma/2 * (v_0/v - 1) - 1))
     # print("C_e",C_e)
     # print("J",J)
-    S_eos = -J * p_eos * C_e_inv
+    # S_eos = -J * p_eos * C_e_inv
+    
+    S_eos = 0
 
-    S=S_el+S_eos  # vis dropped for now
+    S=S_el + S_eos#+S_eos  # eos, vis dropped for now
 
     ################new implementation based on Nicolo's paper###################
     # delta=3./2. * (J**(2/3.)-1)
@@ -85,7 +88,7 @@ def computeSecondPiola(F_e,const_dictionary,v,C_e,C_e_inv,E_e):
     # S_el_voigt=S_cpl1 # same term in previous implmentation
     #################################################################################
     
-    return S,S_eos,S_el_voigt,p_eos
+    return S,S_eos,S_el_voigt
 
 def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     # Assume S,FP,F are 3*3 matrices

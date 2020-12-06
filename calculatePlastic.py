@@ -177,6 +177,34 @@ def getSlipSystems(index):
 
     return slipDirection, slipPlane
 
+def calcDFpDSe(dt,  F_p_current, gamma_dot_ref, g_current,m, S_elastic):
+    Fp = np.zeros([3,3])
+    Fp[0:2,0:2] = F_p_current
+    Fp[2,2] = 1
+
+    S_e = np.zeros([3,3])
+    S_e[0:2,0:2] = S_elastic
+    S_e[2,2] = 1
+
+    dFpdSe = np.zeros([2,2,2,2])
+    for alpha_i in range(10):
+        schmid = getSchmidTensor(alpha_i)
+        dFpdgamma = dt* np.dot(schmid,Fp)
+
+        tau_alpha = np.tensordot(S_e,schmid,axes= 2)
+        tau_th_alpha = getStrengthRatio(alpha_i) * g_current[alpha_i]
+        dgammadtau = gamma_dot_ref/m/tau_th_alpha * np.abs(tau_alpha/tau_th_alpha)**(1/m-1)
+
+        dtaudSe = schmid
+
+        placeholder = np.tensordot(dFpdgamma, dgammadtau * dtaudSe, axes = 0)
+
+        dFpdSe += placeholder[0:2,0:2, 0:2, 0:2] # turn into a 4th order 2d
+
+    return dFpdSe
+
+
+
 
 
 # ANDREW: Created this function to check for convergence of slip resistance parameters for each slip plane.

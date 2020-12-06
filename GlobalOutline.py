@@ -17,6 +17,7 @@ C_ela_3d_voigt = 1e9*np.array([[21.15,10.18,9.77,0.058,4.05,-0.18],\
 C_ela_2d_voigt = C_ela_3d_voigt[0:3,0:3] # Elasticity tensor for a 2D problem
 
 C_ela_3d = mat2tens(C_ela_3d_voigt) #  3 3 3 3
+C_ela_2d = C_ela_3d[0:2,0:2,0:2,0:2]
 
 const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "T" : 300., # TODO ARBITRARY VALUE FOR NOW Ambient temperature of material [K]
@@ -34,6 +35,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "h" : 9.34e6, # Hardening matrix [Pa]
 "C_ela_2d_voigt" : C_ela_2d_voigt,
 "C_ela_3d": C_ela_3d, #  3 3 3 3
+"C_ela_2d": C_ela_2d,
 "C_s": 3070., # reference bulk speed of sound [m/s] 
 "n_IP":4 # integration pts per elem
 }
