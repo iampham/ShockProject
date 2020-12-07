@@ -9,7 +9,11 @@ def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
     # TODO experimenting
     # result_inc*=2
 
-    F_p_current=np.dot(result_inc,F_p)
+    F_p_inv = np.linalg.inv(F_p)
+
+    F_p_current_inv = np.dot(F_p_inv,result_inc)
+    F_p_current = np.linalg.inv(F_p_current_inv)
+    # F_p_current=np.dot(result_inc,F_p)
     # print(F_p_current,"F_p_current")
     return F_p_current,g_current
 
@@ -140,6 +144,7 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
     for i in range(len(g_current)):
         if g_current[i]>g_sat:
             g_current[i] = g_sat
+
     return g_current
 
 
@@ -182,7 +187,7 @@ def getSlipSystems(index):
     np.array([\
     [0.,1.,0.],\
     [1.,0.,0.],\
-    [-1.,-1.,0.]])
+    [-1.,1.,0.]])
     # 10*3 dimension
     # slipDirections = \
     # np.array([ \

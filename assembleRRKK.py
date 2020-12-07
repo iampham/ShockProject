@@ -287,7 +287,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     deltav[ci] = 1
                     gradX_v = np.outer(deltav,dNsdX[:,ni])
                     deltaE= 0.5*(np.dot(F.transpose(),gradX_v) + np.dot(gradX_v.transpose(),F))
-                    deltaE_voigt = np.array([deltaE[0,0],deltaE[1,1],2*deltaE[0,1]])
+                    # deltaE_voigt = np.array([deltaE[0,0],deltaE[1,1],2*deltaE[0,1]])
                     # Re[ni*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S_current,deltaE)
 
                     # ASSEMBLE INTO GLOBAL RESIDUAL (I didn't ask for this)

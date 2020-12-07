@@ -48,8 +48,8 @@ for t in range(nSteps):
     detFe_t[t] = np.mean(detFe)
     detFp_t[t] = np.mean(detFp)
 
-plt.plot(t_vec[0:9] ,detF_t[0:9],"x",label="detF")
-plt.plot(t_vec[0:9] ,detFe_t[0:9],label="detFe")
-plt.plot(t_vec[0:9] ,detFp_t[0:9],label="detFp")
+plt.plot(t_vec ,detF_t,"x",label="detF")
+plt.plot(t_vec ,detFe_t,label="detFe")
+plt.plot(t_vec ,detFp_t,label="detFp")
 plt.legend()
 plt.show()
