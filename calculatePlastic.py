@@ -1,5 +1,6 @@
 import numpy as np 
 import time
+from Spktwo2three import *
 def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S):
     
     
@@ -42,9 +43,11 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
     F_e_3[2,2] = 1 # TODO changed to 0 for debugging
 
 
-    S3 = np.zeros([3,3])
-    S3[0:2,0:2] = S
-    S3[2,2] = 0  # TODO changed to 0 for debugging
+    # S3 = np.zeros([3,3])
+    # S3[0:2,0:2] = S
+    # S3[2,2] = 0  # TODO changed to 0 for debugging
+
+    S3=Spktwo2three(S,F_e)
 
     strainIncrement = np.zeros([3,3])
 
@@ -65,7 +68,7 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
             else:
                 resultant_increment[i,j] += 0 - strainIncrement[i,j]
 
-
+    # print("resultant_increment",resultant_increment)
     g_next = getNextResistance(g_sat, g_prev, a, h, slipRates, dt)
 
     return resultant_increment[0:2, 0:2], g_next
@@ -90,7 +93,7 @@ def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
     # print("g_prev",g_si)                 # 1   
     # print("gamma_dot_ref",gamma_dot_ref) # 1.0*e7
     # print("tau_s",tau_s) # +-e8 or 0 some cases
-
+    # TODO: something causes tau_s to be larger than tau_th_s, and further blows up slip rate. investigate
     tau_th_s = getStrengthRatio(index) * g_si
     # print("tau_th_s",tau_th_s)
     # print("g_si",g_si)
@@ -123,7 +126,7 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
             g_dot[i] += h * (1-g_prev[j]/g_sat)**a * slipRates[j]
 
 
-            
+
             if g_dot[i]==np.nan:
                 print("g_prev[j]",g_prev[j])
                 # print("g_sat",g_sat)
@@ -133,7 +136,10 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
     # Time discretization of ODE
     g_current = g_prev + dt*g_dot
 
-    
+    # make g_cur never exceed g_sat
+    for i in range(len(g_current)):
+        if g_current[i]>g_sat:
+            g_current[i] = g_sat
     return g_current
 
 
@@ -206,6 +212,7 @@ def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic):
 
         tau_alpha = np.tensordot(S_e,schmid,axes= 2)
         tau_th_alpha = getStrengthRatio(alpha_i) * g_current[alpha_i]
+        # print("g_current[alpha_i]",g_current[alpha_i])
         dgammadtau = gamma_dot_ref/m/tau_th_alpha * np.abs(tau_alpha/tau_th_alpha)**(1/m-1)
 
         dtaudSe = schmid

@@ -104,7 +104,7 @@ for i in range(n_nodes):
     node_x[i] = X
     # but then apply boundary conditions
     if X[0]<=0.00001:
-        node_x[i,0] = 0.1 #known displacement, no more shocks
+        node_x[i,0] = 0.001 #known displacement, no more shocks
     if X[1]<0.00001: 
         node_x[i,1] = 0.
     if X[0]>0.9999: 
@@ -186,8 +186,11 @@ while(res>tol and iter<itermax):
 
     RRdof= RR[8:]
     KKdof = KK[8:, 8:]
-
+    # a relatively large residual for ei3 ip2, a big increment occured after first iteration here, incru=-130 for one node
     res = np.linalg.norm(RRdof)
+    # print("KKdof",KKdof)
+    # print("RRdof",RRdof)
+    # print("KKdof_inv",np.linalg.inv(KKdof))
     incr_u = -np.linalg.solve(KKdof,RRdof)
 
     # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0

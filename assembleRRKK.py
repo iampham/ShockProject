@@ -74,6 +74,9 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                           [+1./np.sqrt(3),+1./np.sqrt(3)],[-1./np.sqrt(3),+1./np.sqrt(3)]])
         IP_wi = np.array([1.,1.,1.,1.])
         for ip in range(n_IP):
+            # input()
+            # print("---------ei----------",ei)
+            # print("ip",ip)
             xi  = IP_xi[ip,0]
             eta = IP_xi[ip,1]
             wi = IP_wi[ip]
@@ -109,9 +112,9 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             # compute the stress, some parameters not defined
             
             # 1 - Need initial value of F_p and F_e
-            F_p_prev_loc = F_p_prev[:,:,ei,ip]
+            F_p_current_loc = F_p_prev[:,:,ei,ip]
             # calculate F_e from F and F_p
-            F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_prev_loc)) 
+            F_e_prev_loc = np.dot(F,np.linalg.inv(F_p_current_loc)) 
 
             # compute strain variables before interations
             C_e=np.dot(F_e_prev_loc.transpose(),F_e_prev_loc)
@@ -147,7 +150,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     # according to the current shockwave boundary and coordinates of ip, update v
                     
                     # Residual and Jacobian to compute Next Stress                    
-                    res_S, J_S, F_e_current = computeSecondPiolaResidualJacobian(S_prev,F_p_prev_loc,F,g_prev_loc,dt,const_dictionary) 
+                    res_S, J_S, F_e_current = computeSecondPiolaResidualJacobian(S_prev,F_p_current_loc,F,g_prev_loc,dt,const_dictionary) 
                     F_e_current=F_e_current[0:2,0:2]
                     # compute delta_S and add it to S
                     # slice 3d to 2d before the tensordot and increment 
@@ -178,7 +181,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     # end of S loop
 
                     
-                F_p_current, g_current = calculateNextPlastic(F_p_prev_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current)
+                F_p_next_loc, g_current = calculateNextPlastic(F_p_current_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current)
                 # print("F_p_current",F_p_current)
                 g_diff = np.abs(g_prev_loc-g_current)
                 # if g_diff>g_max:
@@ -205,12 +208,16 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             S_elastic = S_current
 
             # print("outside")
-            F_p_inv = np.linalg.inv(F_p_current)
+            F_p_inv = np.linalg.inv(F_p_current_loc)
             F_p_invT = F_p_inv.transpose()
             S_all = np.dot(F_p_inv,np.dot(S_elastic, F_p_invT))
-            print("F_p_inv",F_p_inv)
-            print("S_elastic",S_elastic)
-            print("S_all",S_all)
+            # print("F_P",F_p_current)
+            # print("F_p_inv*************",F_p_inv)
+            # print("S_elastic",S_elastic)
+            # print("S_all",S_all)
+
+            sigma_all=1./(np.linalg.det(F_e_current))*np.dot(F_e_current, np.dot(S_all,F_e_current))
+            # print("sigma_all",sigma_all)
 
             S_all_voigt = np.zeros([1,3])
             S_all_voigt[0,0] = S_all[0,0]
@@ -265,11 +272,11 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             # store results in global variables
             g_next[:,:,ei,ip] = g_current
             # sigma_next[:,:,ei,ip] = sigma
-            S_next_all[:,:,ei,ip] = S_current
+            S_next_all[:,:,ei,ip] = S_all
             F_e_next[:,:,ei,ip] = F_e_current
-            F_p_next[:,:,ei,ip] = F_p_current
+            F_p_next[:,:,ei,ip] = F_p_next_loc
             F_next[:,:,ei,ip] = F
-
+            # print("F",F)
             # compute the variation of the symmetric velocity gradient by moving one node and one component
             # of that node at a time, except if the node is on the boundary in which case no variation is allowed
             for ni in range(4): # deltav and deltau corresponds to a,b in lecture, ni is # nodes in elem
@@ -284,7 +291,11 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     # Re[ni*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S_current,deltaE)
 
                     # ASSEMBLE INTO GLOBAL RESIDUAL (I didn't ask for this)
+                    # print("dXdxi",dXdxi)
+                    # print("deltaE",deltaE)
+                    # print("RR product",wi*np.linalg.det(dXdxi)*np.tensordot(S_all,deltaE))
                     RR[node_ei[ni]*2+ci] += wi*np.linalg.det(dXdxi)*np.tensordot(S_all,deltaE)
+                    # print("local residual",wi*np.linalg.det(dXdxi)*np.tensordot(S_all,deltaE))
 
                     
                     ## 2 more for loops for the increment Delta u
@@ -304,6 +315,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                             # Initial stress component (also called geometric component) is 
                             # refer to Linearization.pdf
                             Kgeom = np.tensordot(S_all, Delta_delta_E,axes=2)
+                            # print("Kgeom",Kgeom)
                             # Material component, need to put things in voigt notation for easy computation
                             # deltad_voigt = np.array([deltad[0,0],deltad[1,1],2*deltad[0,1]])
                             
@@ -325,22 +337,27 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
 
                             #### Part 1 of material stiffness
                             dSdC = np.tensordot(F_p_inv_up, np.tensordot(C_ela,F_p_invT_up, axes = 2), axes = 2)
-                            # print("dSdC_norm",np.linalg.norm(dSdC))
-                            # print("Fpinvt", np.linalg.norm(F_p_inv_up))
+
                             
 
                             #### Part 2 of material stiffness 
                             dSdFp = -(F_p_inv_up_S + S_all_down_F_p_inv) - np.tensordot((F_p_inv_up), \
                                             np.tensordot(0.5*C_ela, F_p_invT_down_C_e + C_e_up_F_p_invT, axes =2),  axes = 2) # large term 
-                            # print("dSdFp_norm",np.linalg.norm(dSdFp))
-
-                            dFpdSe = calcDFpDSe(dt,  F_p_prev_loc, gamma_dot_ref, g_current,m, S_elastic)
-                            # print("dFpdSe_norm",np.linalg.norm(dFpdSe))
-                            dSedCe = 0.5 *C_ela # large term
-                            # print("dSedCe_norm",np.linalg.norm(dSedCe))
-                            dCedC = np.tensordot(F_p_invT, F_p_inv, axes = 0) 
-                            # print("dCedC_norm",np.linalg.norm(dCedC))
                             
+
+                            dFpdSe = calcDFpDSe(dt,  F_p_current_loc, gamma_dot_ref, g_current,m, S_elastic)
+                            
+                            dSedCe = 0.5 *C_ela # large term
+                            
+                            dCedC = np.tensordot(F_p_invT, F_p_inv, axes = 0) 
+                            # print("----------------------------------")
+                            # print("dSdC_norm",np.linalg.norm(dSdC))
+                            # print("Fpinvt", np.linalg.norm(F_p_inv_up))
+                            # print("dSdFp_norm",np.linalg.norm(dSdFp))
+                            # print("dFpdSe_norm",np.linalg.norm(dFpdSe))
+                            # print("dSedCe_norm",np.linalg.norm(dSedCe))
+                            # print("dCedC_norm",np.linalg.norm(dCedC))
+                            # print("----------------------------------")
 
                             bigdaddy = np.tensordot(dSdFp, \
                                             np.tensordot(dFpdSe,\
