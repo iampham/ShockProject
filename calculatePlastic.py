@@ -53,7 +53,7 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
 
     slipRates = np.zeros([10,1])
 
-    for index in range(10):
+    for index in range(3):
 
         slipRates[index], schmidTensor,tau_th_s,tau_s = calculateSlipRate(F_e_3,S3,gamma_dot_ref, m, g_prev[index], index)
         # print("slipRates[index]",slipRates[index])
@@ -115,9 +115,9 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
     g_dot = np.zeros([10,1])
 
 
-    for i in range(10):
+    for i in range(3):
         # Andrew's debugging: the next resistance must take into account the slip from all slip planes.
-        for j in range(10):
+        for j in range(3):
             if g_prev[j]>g_sat:
                 print("g_prev",g_prev)
                 print("g_sat",g_sat)
@@ -173,23 +173,33 @@ def getStrengthRatio(index):
 
 def getSlipSystems(index):
 
-    # 10*3 dimension
     slipDirections = \
-    np.array([ \
-    [1.,0.,0.], [1.,0.,0.], \
-    [-1.,0.,0.], [0.,1.,0.],\
-    [1.,0.,0.], [2.,0.,1.], \
-    [0.,-1.,1.], [0.,-1.,-1.],\
-    [-1.,0.,-1.], [1.,0.,1.] ])
+        np.array([\
+            [1.,0.,0.],\
+            [0.,1.,0.],\
+            [1.,1.,0.]])
+    slipPlanes = \
+    np.array([\
+    [0.,1.,0.],\
+    [1.,0.,0.],\
+    [-1.,-1.,0.]])
+    # 10*3 dimension
+    # slipDirections = \
+    # np.array([ \
+    # [1.,0.,0.], [1.,0.,0.], \
+    # [-1.,0.,0.], [0.,1.,0.],\
+    # [1.,0.,0.], [2.,0.,1.], \
+    # [0.,-1.,1.], [0.,-1.,-1.],\
+    # [-1.,0.,-1.], [1.,0.,1.] ])
 
     # 10*3 dimension
-    slipPlanes = \
-    np.array([ \
-    [0.,1.,0.], [0.,1.,1.],\
-    [0.,1.,-1.], [-1.,0.,2.], \
-    [0.,0.,1.], [-1.,0.,2.], \
-    [0.,1.,1.], [0.,-1.,1.], \
-    [-1.,-1., 1.], [1.,-1.,-1.] ])
+    # slipPlanes = \
+    # np.array([ \
+    # [0.,1.,0.], [0.,1.,1.],\
+    # [0.,1.,-1.], [-1.,0.,2.], \
+    # [0.,0.,1.], [-1.,0.,2.], \
+    # [0.,1.,1.], [0.,-1.,1.], \
+    # [-1.,-1., 1.], [1.,-1.,-1.] ])
 
     slipPlane = slipPlanes[index]
     slipDirection = slipDirections[index]
@@ -206,7 +216,7 @@ def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic):
     S_e[2,2] = 1
 
     dFpdSe = np.zeros([2,2,2,2])
-    for alpha_i in range(10):
+    for alpha_i in range(3):
         schmid = getSchmidTensor(alpha_i)
         dFpdgamma = dt* np.dot(schmid,Fp)
 

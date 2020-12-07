@@ -352,7 +352,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                             dCedC = np.tensordot(F_p_invT, F_p_inv, axes = 0) 
                             # print("----------------------------------")
                             # print("dSdC_norm",np.linalg.norm(dSdC))
-                            # print("Fpinvt", np.linalg.norm(F_p_inv_up))
+                            # print("Fpinvup", np.linalg.norm(F_p_inv_up))
                             # print("dSdFp_norm",np.linalg.norm(dSdFp))
                             # print("dFpdSe_norm",np.linalg.norm(dFpdSe))
                             # print("dSedCe_norm",np.linalg.norm(dSedCe))
@@ -364,17 +364,16 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                                                 np.tensordot(dSedCe, dCedC, axes = 2), axes = 2), axes =2)
 
                             
-                            # print( "dCedC",  np.linalg.norm(dCedC))
 
                             bigC = 2 * dSdC + 2 * bigdaddy 
                             # print("bigdaddy_norm",np.linalg.norm(bigdaddy))
+
 
                             Kmat = np.tensordot(Deltaeps,\
                                         np.tensordot(bigC, deltaE, axes = 2), axes = 2)
                             
                             
                             # Kmat_F = Kmat_F_1 + Kmat_F_2
-
 
 
                             # Kmat_F = np.dot(Deltaeps_voigt,np.dot(C_ela_2d_voigt,deltaE_voigt.transpose()).transpose())                             

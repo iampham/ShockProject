@@ -20,7 +20,7 @@ import time
 # material parameters of beta-HMX from 
 # Effect of initial damage variability on hot-spot nucleation in energetic materials
 # Camilo A. Duarte, Nicolò Grilli, and Marisol Koslowski
-E= 25.12e5 # should be 25.12e9
+E= 25.12e4# should be 25.12e9
 nu= 0.24
 C_ela_3d_voigt =np.zeros([6,6])
 C_ela_3d_voigt[0,0]=E*(1-nu)/((1+nu)*(1-2*nu))
@@ -70,7 +70,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 # TODO: start time changed here
 timeStart = 0.
 timeEnd =timeStart+ 0.5
-nSteps = 1000
+nSteps = 25
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
 # Calculate the size of the timestep
@@ -103,7 +103,7 @@ for i in range(n_nodes):
     # first initialize with the same as original
     node_x[i] = X
     # but then apply boundary conditions
-    if X[0]<=0.00001:
+    if X[0]<= 0.00001:
         node_x[i,0] = 0.001 #known displacement, no more shocks
     if X[1]<0.00001: 
         node_x[i,1] = 0.
@@ -172,7 +172,7 @@ resultant_increment_prev = np.zeros([2,2])
 # Newton raphson for global problem
 res = 1.
 iter = 0
-tol = 1e-6
+tol = 1e-3
 itermax = 1000
 
 
@@ -204,6 +204,9 @@ while(res>tol and iter<itermax):
     iter +=1
     print("res:",res)
     print("incr_u",incr_u)
+    print("Fpnext", F_p_next[:,:,4,0])
+    # print('KK', np.linalg.norm(KKdof))
+    # print('RR', np.linalg.norm(RRdof))
 
 print('NR iterations %i, res %1.7e'%(iter,res))
 
@@ -236,7 +239,7 @@ for tIndex in range(1, len(t_vec)):
         X = node_X[i]
         # but then apply boundary conditions
         if X[0]<0.00001:
-            node_x[i,0] += 0.1 * deltat # TODO: make a time dependent BC
+            node_x[i,0] += 0.3 * deltat # TODO: make a time dependent BC
         if X[1]<0.00001: 
             node_x[i,1] = 0.
         # right boundary fixed for all time
@@ -303,6 +306,8 @@ for tIndex in range(1, len(t_vec)):
     # u_current = u_next
     # v_current = v_next
     # a_current = a_next
+    filename = 'FEAData' 
+    np.savez(filename, S_all = S_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, node_x = node_x, node_X = node_X)
 
 
 

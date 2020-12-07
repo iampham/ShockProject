@@ -171,7 +171,7 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     
     dFpinvdSprev=np.zeros([3,3,3,3])
     # Iterating for all slip systems alpha  
-    for alpha_i in range(10):
+    for alpha_i in range(3):
         dDResultantIncdSlipRate = - getSchmidTensor(alpha_i)
         dtaudSprev = getSchmidTensor(alpha_i)
         dFpinvdDslip = np.dot(dFpinvdDResultantInc,dDResultantIncdSlipRate)
