@@ -170,16 +170,10 @@ def getSchmidTensor(index,R):
 
 def getStrengthRatio(index):
 
-    strengthRatios = np.array([1,\
+    strengthRatios = np.array([0.963,\
     0.963,\
     0.963,\
-    0.933,\
-    1.681,\
-    0.376,\
-    0.931,\
-    0.931,\
-    0.701,\
-    0.701])
+    0.963])
 
     strengthRatio = strengthRatios[index]
 
