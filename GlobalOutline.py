@@ -21,7 +21,7 @@ import time
 # Effect of initial damage variability on hot-spot nucleation in energetic materials
 # Camilo A. Duarte, Nicolò Grilli, and Marisol Koslowski
 E= 100e2# should be 25.12e9
-nu= 0
+nu= 0.2
 C_ela_3d_voigt =np.zeros([6,6])
 C_ela_3d_voigt[0,0]=E*(1-nu)/((1+nu)*(1-2*nu))
 C_ela_3d_voigt[1,1]=E*(1-nu)/((1+nu)*(1-2*nu))
