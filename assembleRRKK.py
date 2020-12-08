@@ -2,7 +2,7 @@ import numpy as np
 from calculatePlastic import * 
 from computeSecondPiola import *
 
-def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt):
+def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,dt,R_all):
     """
     INPUTS: State & Material parameters to the equation:
         - Gamma: Mie Gruneisen Parameter
@@ -52,6 +52,8 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
     F_e_next=np.zeros([2,2,n_elem,n_IP])
     # loop over elements
     for ei in range(n_elem): 
+        # R matrix for this element
+        R=R_all[:,:,ei]
         # initialize the residual for this element
         Re = np.zeros((8))
         # initialize the tangent for this element
@@ -150,7 +152,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     # according to the current shockwave boundary and coordinates of ip, update v
                     
                     # Residual and Jacobian to compute Next Stress                    
-                    res_S, J_S, F_e_current = computeSecondPiolaResidualJacobian(S_prev,F_p_current_loc,F,g_prev_loc,dt,const_dictionary) 
+                    res_S, J_S, F_e_current = computeSecondPiolaResidualJacobian(S_prev,F_p_current_loc,F,g_prev_loc,dt,const_dictionary,R) 
                     F_e_current=F_e_current[0:2,0:2]
                     # compute delta_S and add it to S
                     # slice 3d to 2d before the tensordot and increment 
@@ -181,7 +183,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     # end of S loop
 
                     
-                F_p_next_loc, g_current = calculateNextPlastic(F_p_current_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current)
+                F_p_next_loc, g_current = calculateNextPlastic(F_p_current_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current,R)
                 # print("F_p_current",F_p_current)
                 g_diff = np.abs(g_prev_loc-g_current)
                 # if g_diff>g_max:
@@ -345,7 +347,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                                             np.tensordot(0.5*C_ela, F_p_invT_down_C_e + C_e_up_F_p_invT, axes =2),  axes = 2) # large term 
                             
 
-                            dFpdSe = calcDFpDSe(dt,  F_p_current_loc, gamma_dot_ref, g_current,m, S_elastic,F_e_current)
+                            dFpdSe = calcDFpDSe(dt,  F_p_current_loc, gamma_dot_ref, g_current,m, S_elastic,F_e_current,R)
                             
                             dSedCe = 0.5 *C_ela # large term
                             

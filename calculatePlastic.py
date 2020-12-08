@@ -1,10 +1,10 @@
 import numpy as np 
 import time
 from Spktwo2three import *
-def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S):
+def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S,R):
     
     
-    result_inc, g_current=calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
+    result_inc, g_current=calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S,R)
     # print("result_inc, " ,result_inc) # result inc is huge e80 for now
     # TODO experimenting
     # result_inc*=2
@@ -17,7 +17,7 @@ def calculateNextPlastic(F_p,gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e, S)
     # print(F_p_current,"F_p_current")
     return F_p_current,g_current
 
-def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,S):
+def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,S,R):
     """ 
     Calculates the plastic part of the deformation tensor. Uses the following equation:
     F_p = deltaGamma dot F_p_prev
@@ -57,9 +57,9 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
 
     slipRates = np.zeros([10,1])
 
-    for index in range(3):
+    for index in range(4):
 
-        slipRates[index], schmidTensor,tau_th_s,tau_s = calculateSlipRate(F_e_3,S3,gamma_dot_ref, m, g_prev[index], index)
+        slipRates[index], schmidTensor,tau_th_s,tau_s = calculateSlipRate(F_e_3,S3,gamma_dot_ref, m, g_prev[index], index,R)
         # print("slipRates[index]",slipRates[index])
         # print("schmidTensor",schmidTensor)
         strainIncrement += slipRates[index] * dt* schmidTensor
@@ -77,10 +77,10 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
 
     return resultant_increment[0:2, 0:2], g_next
 
-def calculateSlipRate(F_e,S,gamma_dot_ref, m, g_si, index):
+def calculateSlipRate(F_e,S,gamma_dot_ref, m, g_si, index,R):
     # everything in this function is 3d
 
-    schmidTensor = getSchmidTensor(index)
+    schmidTensor = getSchmidTensor(index,R)
     ### Need to verify what equation is correct: report or paper ###
 
     #### ANDREW's DEBUGGING #2: this is the implementation for calculating tau_s that i found in moose."CrystalSlipRatePlasticityGSS.C"
@@ -129,9 +129,9 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
     g_dot = np.zeros([10,1])
 
 
-    for i in range(3):
+    for i in range(4):
         # Andrew's debugging: the next resistance must take into account the slip from all slip planes.
-        for j in range(3):
+        for j in range(4):
             if g_prev[j]>g_sat:
                 print("g_prev",g_prev)
                 print("g_sat",g_sat)
@@ -160,9 +160,9 @@ def getNextResistance(g_sat, g_prev, a, h, slipRates, dt):
 
 
 
-def getSchmidTensor(index):
+def getSchmidTensor(index,R):
     
-    slipDirection, slipPlane = getSlipSystems(index)
+    slipDirection, slipPlane = getSlipSystems(index,R)
 
     schmidTensor = np.tensordot(slipDirection, slipPlane, axes = 0) # axes = 0 means tensor product
     # print("schmidTensor, ",schmidTensor) # size of 3*3
@@ -186,18 +186,21 @@ def getStrengthRatio(index):
     return strengthRatio
 
 
-def getSlipSystems(index):
+def getSlipSystems(index,R):
 
     slipDirections = \
         np.array([\
             [1.,0.,0.],\
             [0.,1.,0.],\
-            [1.,1.,0.]])
+            [1./np.sqrt(2),1./np.sqrt(2),0.],\
+            [-1./np.sqrt(2),1./np.sqrt(2),0]])
     slipPlanes = \
     np.array([\
     [0.,1.,0.],\
     [1.,0.,0.],\
-    [-1.,1.,0.]])
+    [-1./np.sqrt(2),1./np.sqrt(2),0.],\
+    [1./np.sqrt(2),1./np.sqrt(2),0.]])
+
     # 10*3 dimension
     # slipDirections = \
     # np.array([ \
@@ -219,9 +222,13 @@ def getSlipSystems(index):
     slipPlane = slipPlanes[index]
     slipDirection = slipDirections[index]
 
+    # apply orientation R for each element
+    slipDirection=np.dot(slipDirection,R)
+    slipPlane=np.dot(slipPlane,R)
+
     return slipDirection, slipPlane
 
-def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic,F_e):
+def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic,F_e,R):
     Fp = np.zeros([3,3])
     Fp[0:2,0:2] = F_p_prev
     Fp[2,2] = 1
@@ -235,8 +242,8 @@ def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic,F_e):
     S_e[2,2] = 1
 
     dFpdSe = np.zeros([2,2,2,2])
-    for alpha_i in range(3):
-        schmid = getSchmidTensor(alpha_i)
+    for alpha_i in range(4):
+        schmid = getSchmidTensor(alpha_i,R)
         dFpdgamma = dt* np.dot(schmid,Fp)
 
         detF=np.linalg.det(F_e_3d)

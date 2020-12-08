@@ -93,7 +93,7 @@ def computeSecondPiola(F_e,const_dictionary,v,C_e,C_e_inv,E_e):
     
     return S,S_eos,S_el_voigt
 
-def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
+def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary,R):
     # Assume S,FP,F are 3*3 matrices
     # Parameters we use in function
     Gamma = const_dictionary["Gamma"] # Mie Gruneisen Parameter []
@@ -171,15 +171,15 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary):
     
     dFpinvdSprev=np.zeros([3,3,3,3])
     # Iterating for all slip systems alpha  
-    for alpha_i in range(3):
-        dDResultantIncdSlipRate = - getSchmidTensor(alpha_i)
-        dtaudSprev = getSchmidTensor(alpha_i)
+    for alpha_i in range(4):
+        dDResultantIncdSlipRate = - getSchmidTensor(alpha_i,R)
+        dtaudSprev = getSchmidTensor(alpha_i,R)
         dFpinvdDslip = np.dot(dFpinvdDResultantInc,dDResultantIncdSlipRate)
 
         # get g_si
         g_si=g[alpha_i]
        
-        slipRate, schmidTensor,tau_th,tau=calculateSlipRate(F_3D,S_prev_3D,gamma_dot_ref, m, g_si, alpha_i)
+        slipRate, schmidTensor,tau_th,tau=calculateSlipRate(F_3D,S_prev_3D,gamma_dot_ref, m, g_si, alpha_i,R)
         # print("tau",tau)
         # print("tau_th",tau_th)
         # print("slipRate",slipRate)

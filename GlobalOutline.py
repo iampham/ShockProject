@@ -96,6 +96,14 @@ node_X = np.array([[0.,0.],[1.,0.],[1.,1.],[0.,1.],
                    [0.27,0.25],[0.75,0.27],[0.73,0.75],[0.25,0.73]])
 elements = np.array([[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7],[4,5,6,7]])
 
+orientations=np.zeros(n_elem) # just and angle for each element
+R_all=np.zeros([3,3,n_elem]) # R matrix for each element
+for i in range(n_elem):
+    theta=orientations[i]
+    R_all[:,:,i]=np.array([[np.cos(theta),-np.sin(theta),0],\
+                        [np.sin(theta),np.cos(theta),0],\
+                        [0.,0.,1.]])
+
 # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
 node_x = np.zeros(node_X.shape)
 for i in range(n_nodes):
@@ -182,7 +190,7 @@ print("Time Step 0")
 # newton raphson for initial time step
 while(res>tol and iter<itermax):
 
-    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next,sigma_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
+    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next,sigma_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,R_all)
 
     RRdof= RR[8:]
     KKdof = KK[8:, 8:]
@@ -262,7 +270,7 @@ for tIndex in range(1, len(t_vec)):
     iter = 0
     while(res>tol and iter<itermax):
 
-        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next,sigma_next = assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
+        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next,sigma_next = assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat,R_all)
 
         RRdof= RR[8:]
         KKdof = KK[8:, 8:]
