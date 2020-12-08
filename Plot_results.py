@@ -15,7 +15,7 @@ timeEnd = data['timeEnd']
 nSteps = data['nSteps']
 n_IP = data['n_IP']
 n_elem = data['n_elem']
-node_x = data['node_x']
+u_vec = data['u_vec']
 node_X = data['node_X']
 
 ################################################
@@ -23,6 +23,7 @@ node_X = data['node_X']
 
 # Time from Global Outline
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
+deltat = t_vec[1] - t_vec[0]
 
 # Element to get data from (Choosing to plot center element)
 elem_plot = 4 # Choose elemnt to plot from n_elem
