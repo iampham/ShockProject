@@ -232,7 +232,7 @@ sigma_all[:,:,:,:,0] = sigma_next
 
 for tIndex in range(1, len(t_vec)):
 
-    print("/nTime Step",tIndex)
+    print("\nTime Step",tIndex)
 
     # update boudary conditions
     # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
