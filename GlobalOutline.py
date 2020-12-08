@@ -182,7 +182,7 @@ print("Time Step 0")
 # newton raphson for initial time step
 while(res>tol and iter<itermax):
 
-    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
+    RR, KK,F_p_next,g_next,S_next,F_e_next,F_next,sigma_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
 
     RRdof= RR[8:]
     KKdof = KK[8:, 8:]
@@ -221,6 +221,7 @@ F_all[:,:,:,:,0] = F_e_next
 F_e_all[:,:,:,:,0] = F_next
 F_p_all[:,:,:,:,0] = F_p_next
 g_all[:,:,:,:,0] = g_next
+sigma_all[:,:,:,:,0] = sigma_next
 
 
 # Initialize external loading vector
@@ -261,7 +262,7 @@ for tIndex in range(1, len(t_vec)):
     iter = 0
     while(res>tol and iter<itermax):
 
-        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next= assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
+        RR, KK,F_p_next,g_next,S_next,F_e_next,F_next,sigma_next = assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, node_X, node_x,F_p_prev,g_prev,deltat)
 
         RRdof= RR[8:]
         KKdof = KK[8:, 8:]
@@ -293,6 +294,7 @@ for tIndex in range(1, len(t_vec)):
     F_all[:,:,:,:,tIndex] = F_next
     F_e_all[:,:,:,:,tIndex] = F_e_next
     F_p_all[:,:,:,:,tIndex] = F_p_next
+    sigma_all[:,:,:,:,tIndex] = sigma_next
 
     g_all[:,:,:,:,tIndex] = g_next
     # print("F_next",F_next[:,:,4,0])
@@ -307,7 +309,7 @@ for tIndex in range(1, len(t_vec)):
     # v_current = v_next
     # a_current = a_next
     filename = 'FEAData' 
-    np.savez(filename, S_all = S_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, node_x = node_x, node_X = node_X)
+    np.savez(filename, S_all = S_all, sigma_all = sigma_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, node_x = node_x, node_X = node_X)
 
 
 
@@ -315,4 +317,4 @@ for tIndex in range(1, len(t_vec)):
 # The load command will output a dictionary containing all of the data shown here. 
 # To access the data, access it like you would a dictionary. 
 filename = 'FEAData' 
-np.savez(filename, S_all = S_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, node_x = node_x, node_X = node_X)
+np.savez(filename, S_all = S_all, sigma_all = sigma_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, node_x = node_x, node_X = node_X)

@@ -5,6 +5,7 @@ data = np.load('FEAData.npz')
 
 # Access the variables stored within the file:
 S_all = data['S_all']
+sigma_all = data['sigma_all']
 F_all = data['F_all']
 F_e_all = data['F_e_all']
 F_p_all = data['F_p_all']
@@ -14,6 +15,8 @@ timeEnd = data['timeEnd']
 nSteps = data['nSteps']
 n_IP = data['n_IP']
 n_elem = data['n_elem']
+node_x = data['node_x']
+node_X = data['node_X']
 
 ################################################
 ########### Choose variables to plot ###########
