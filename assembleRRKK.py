@@ -345,7 +345,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                                             np.tensordot(0.5*C_ela, F_p_invT_down_C_e + C_e_up_F_p_invT, axes =2),  axes = 2) # large term 
                             
 
-                            dFpdSe = calcDFpDSe(dt,  F_p_current_loc, gamma_dot_ref, g_current,m, S_elastic)
+                            dFpdSe = calcDFpDSe(dt,  F_p_current_loc, gamma_dot_ref, g_current,m, S_elastic,F_e_current)
                             
                             dSedCe = 0.5 *C_ela # large term
                             

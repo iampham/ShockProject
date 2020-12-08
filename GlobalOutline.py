@@ -20,7 +20,7 @@ import time
 # material parameters of beta-HMX from 
 # Effect of initial damage variability on hot-spot nucleation in energetic materials
 # Camilo A. Duarte, Nicolò Grilli, and Marisol Koslowski
-E= 25.12e4# should be 25.12e9
+E= 25.125e4# should be 25.12e9
 nu= 0.24
 C_ela_3d_voigt =np.zeros([6,6])
 C_ela_3d_voigt[0,0]=E*(1-nu)/((1+nu)*(1-2*nu))
@@ -70,7 +70,7 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 # TODO: start time changed here
 timeStart = 0.
 timeEnd =timeStart+ 0.5
-nSteps = 25
+nSteps = 30
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
 # Calculate the size of the timestep
@@ -104,7 +104,7 @@ for i in range(n_nodes):
     node_x[i] = X
     # but then apply boundary conditions
     if X[0]<= 0.00001:
-        node_x[i,0] = 0.001 #known displacement, no more shocks
+        node_x[i,0] = 0.01 #known displacement, no more shocks
     if X[1]<0.00001: 
         node_x[i,1] = 0.
     if X[0]>0.9999: 

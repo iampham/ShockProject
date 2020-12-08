@@ -77,17 +77,21 @@ def calculateResultantIncrement(gamma_dot_ref, m,  g_sat, g_prev, a, h, dt, F_e,
 
     return resultant_increment[0:2, 0:2], g_next
 
-def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
+def calculateSlipRate(F_e,S,gamma_dot_ref, m, g_si, index):
     # everything in this function is 3d
 
     schmidTensor = getSchmidTensor(index)
     ### Need to verify what equation is correct: report or paper ###
 
     #### ANDREW's DEBUGGING #2: this is the implementation for calculating tau_s that i found in moose."CrystalSlipRatePlasticityGSS.C"
-    #### This seems to agree with Nicolo's paper. 
+    #### This seems to agree with Nicolo's paper.  
     tau_s = np.tensordot(S,schmidTensor,axes=2)
     # tau_s = np.tensordot(np.dot(F.transpose(), np.dot(F,S)), schmidTensor,axes=2) 
 
+    # push to sigma before computing resolved shear stress 
+    detF=np.linalg.det(F_e)
+    sigma=1/(detF) * np.dot(F_e,np.dot(S,F_e.transpose()))
+    tau_s = np.tensordot(sigma,schmidTensor,axes=2)
 
 
 
@@ -104,6 +108,12 @@ def calculateSlipRate(F,S,gamma_dot_ref, m, g_si, index):
     slipRate = gamma_dot_ref * np.sign(tau_s) * np.abs(tau_s/tau_th_s)**(1/m)
     if np.isnan(slipRate):
         time.sleep(100)
+
+    # TEST: do we need phonon drag limit?
+    # phonon_lim = 0.0025e9
+    # if slipRate>phonon_lim:
+    #     print("***************************REACHED LIMIT***********************************")
+    #     slipRate= np.sign(slipRate)*phonon_lim
     
     #print("slipRate",slipRate) # sliprate is huge e80 for now
     # input("press enter")
@@ -211,10 +221,14 @@ def getSlipSystems(index):
 
     return slipDirection, slipPlane
 
-def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic):
+def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic,F_e):
     Fp = np.zeros([3,3])
     Fp[0:2,0:2] = F_p_prev
     Fp[2,2] = 1
+
+    F_e_3d = np.zeros([3,3])
+    F_e_3d[0:2,0:2] = F_e
+    F_e_3d[2,2] = 1
 
     S_e = np.zeros([3,3])
     S_e[0:2,0:2] = S_elastic
@@ -225,10 +239,16 @@ def calcDFpDSe(dt,  F_p_prev, gamma_dot_ref, g_current,m, S_elastic):
         schmid = getSchmidTensor(alpha_i)
         dFpdgamma = dt* np.dot(schmid,Fp)
 
-        tau_alpha = np.tensordot(S_e,schmid,axes= 2)
+        detF=np.linalg.det(F_e_3d)
+        sigma=1/(detF) * np.dot(F_e_3d,np.dot(S_e,F_e_3d.transpose()))
+        tau_alpha = np.tensordot(sigma,schmid,axes=2)
         tau_th_alpha = getStrengthRatio(alpha_i) * g_current[alpha_i]
         # print("g_current[alpha_i]",g_current[alpha_i])
         dgammadtau = gamma_dot_ref/m/tau_th_alpha * np.abs(tau_alpha/tau_th_alpha)**(1/m-1)
+        # phonon_lim = 0.0025e9
+        # if slipRate>phonon_lim:
+        #     print("***************************REACHED LIMIT***********************************")
+        #     slipRate= np.sign(slipRate)*phonon_lim
 
         dtaudSe = schmid
 
