@@ -142,7 +142,7 @@ F_p_all = np.zeros([2,2,n_elem,n_IP,nSteps])
 g_all = np.zeros([10,1,n_elem,n_IP,nSteps])
 
 # Intitial condition of hardening
-g_all[:,:,:,:,0] =103.03e6 * np.ones([10,1,n_elem,n_IP]) # 1e7 times smaller than g_dot_ref? # TODO 7 dec 2020 DM - changed to same order as g_sat from 103.03e3 to 103.03e6
+g_all[:,:,:,:,0] =103.03e3 * np.ones([10,1,n_elem,n_IP]) # 1e7 times smaller than g_dot_ref? # TODO 7 dec 2020 DM - In process of testing to same order as g_sat from 103.03e3 to 103.03e6
 
 # Initialize first guess for plastic deformation gradient
 for i_elem in range(n_elem):
