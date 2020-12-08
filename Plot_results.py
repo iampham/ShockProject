@@ -17,6 +17,7 @@ n_IP = data['n_IP']
 n_elem = data['n_elem']
 u_vec = data['u_vec']
 node_X = data['node_X']
+elements = data['elements']
 
 ################################################
 ########### Choose variables to plot ###########
