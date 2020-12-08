@@ -271,7 +271,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
             
             # store results in global variables
             g_next[:,:,ei,ip] = g_current
-            # sigma_next[:,:,ei,ip] = sigma
+            sigma_next[:,:,ei,ip] = sigma_all
             S_next_all[:,:,ei,ip] = S_all
             F_e_next[:,:,ei,ip] = F_e_current
             F_p_next[:,:,ei,ip] = F_p_next_loc
@@ -404,7 +404,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                             # assemble into global 
                             KK[node_ei[ni]*2+ci,node_ei[nj]*2+cj] += wi*np.linalg.det(dXdxi)*(Kgeom+Kmat)
                             
-    return RR,KK,F_p_next,g_next,S_next_all,F_e_next,F_next
+    return RR,KK,F_p_next,g_next,S_next_all,F_e_next,F_next,sigma_next
 
 
 def specialDyadUp(A,B):
