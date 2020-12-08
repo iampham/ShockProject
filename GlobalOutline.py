@@ -20,8 +20,8 @@ import time
 # material parameters of beta-HMX from 
 # Effect of initial damage variability on hot-spot nucleation in energetic materials
 # Camilo A. Duarte, Nicolò Grilli, and Marisol Koslowski
-E= 25.125e4# should be 25.12e9
-nu= 0.24
+E= 100e2# should be 25.12e9
+nu= 0
 C_ela_3d_voigt =np.zeros([6,6])
 C_ela_3d_voigt[0,0]=E*(1-nu)/((1+nu)*(1-2*nu))
 C_ela_3d_voigt[1,1]=E*(1-nu)/((1+nu)*(1-2*nu))
@@ -54,11 +54,11 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 "C_v" : 2357.3, # Specific heat capacity [J/(Kg*K)]
 "s" : 1.79, # Slope Hugoniot []
 "alpha" : np.array([[1,0],[0,1]]), # TODO NEED RIGHT TENSOR hermal expansion tensor []
-"gamma_dot_ref" : 0.001e9, # Reference slip rate [s^-1]
+"gamma_dot_ref" : 0.001e3, # Reference slip rate [s^-1]
 "m" : 0.1, # Slip rate exponent []
-"g_sat" : 155.73e3, # Saturation slip resistance [Pa] was e6
+"g_sat" : 155.73e0, # Saturation slip resistance [Pa] was e6
 "a" : 2.5, # Hardening exponent []
-"h" : 9.34e6, # Hardening matrix [Pa]
+"h" : 9.34e0, # Hardening matrix [Pa]
 "C_ela_2d_voigt" : C_ela_2d_voigt,
 "C_ela_3d": C_ela_3d, #  3 3 3 3
 "C_ela_2d": C_ela_2d,
@@ -142,7 +142,7 @@ F_p_all = np.zeros([2,2,n_elem,n_IP,nSteps])
 g_all = np.zeros([10,1,n_elem,n_IP,nSteps])
 
 # Intitial condition of hardening
-g_all[:,:,:,:,0] =103.03e3 * np.ones([10,1,n_elem,n_IP]) # 1e7 times smaller than g_dot_ref?
+g_all[:,:,:,:,0] =103.03e0 * np.ones([10,1,n_elem,n_IP]) # 1e7 times smaller than g_dot_ref?
 
 # Initialize first guess for plastic deformation gradient
 for i_elem in range(n_elem):
