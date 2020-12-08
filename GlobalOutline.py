@@ -150,7 +150,7 @@ for i_elem in range(n_elem):
         F_p_all[:,:,i_elem,i_p,0] = np.eye(2)
 
 # Keep track of displacements at all time steps
-u_vec = np.zeros((n_nodes,2,nSteps))
+u_vec = np.zeros([n_nodes,2,nSteps])
 # v_vec = np.zeros((n_nodes,2,nSteps))
 # a_vec = np.zeros((n_nodes,2,nSteps))
 
@@ -213,7 +213,7 @@ print('NR iterations %i, res %1.7e'%(iter,res))
 
 # store in timed var
 # u_vec[:,:,0]=incr_u
-u_vec[:,:,0]=node_x # Storing deformed x instead of displacement u
+u_vec[:,:,0] = node_x # Storing deformed x instead of displacement u
 # v_vec[:,:,0]=v_current
 # a_vec[:,:,0]=a_current
 S_all[:,:,:,:,0] = S_next
@@ -232,7 +232,7 @@ sigma_all[:,:,:,:,0] = sigma_next
 
 for tIndex in range(1, len(t_vec)):
 
-    print("Time Step",tIndex)
+    print("\nTime Step",tIndex)
 
     # update boudary conditions
     # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
@@ -287,7 +287,7 @@ for tIndex in range(1, len(t_vec)):
     # a_current = np.dot(Minv, -np.dot(C,v_current) - RR ) # TODO: check dimensions of matrices, P_current set to 0
     # store in timed var
     # u_vec[:,:,tIndex]=incr_u
-    u_vec[:,:,tIndex]=node_x # Storing deformed x instead of displacement u
+    u_vec[:,:,tIndex] = node_x # Storing deformed x instead of displacement u
     # v_vec[:,:,tIndex]=v_current
     # a_vec[:,:,tIndex]=a_current
     S_all[:,:,:,:,tIndex] = S_next
@@ -309,7 +309,7 @@ for tIndex in range(1, len(t_vec)):
     # v_current = v_next
     # a_current = a_next
     filename = 'FEAData' 
-    np.savez(filename, S_all = S_all, sigma_all = sigma_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, node_x = node_x, node_X = node_X)
+    np.savez(filename, S_all = S_all, sigma_all = sigma_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, u_vec = u_vec, node_X = node_X, elements = elements)
 
 
 
@@ -317,4 +317,4 @@ for tIndex in range(1, len(t_vec)):
 # The load command will output a dictionary containing all of the data shown here. 
 # To access the data, access it like you would a dictionary. 
 filename = 'FEAData' 
-np.savez(filename, S_all = S_all, sigma_all = sigma_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, node_x = node_x, node_X = node_X)
+np.savez(filename, S_all = S_all, sigma_all = sigma_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, u_vec = u_vec, node_X = node_X, elements = elements)
