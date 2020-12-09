@@ -93,7 +93,7 @@ def computeSecondPiola(F_e,const_dictionary,v,C_e,C_e_inv,E_e):
     
     return S,S_eos,S_el_voigt
 
-def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary,R):
+def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary,R, g_prev_loc):
     # Assume S,FP,F are 3*3 matrices
     # Parameters we use in function
     Gamma = const_dictionary["Gamma"] # Mie Gruneisen Parameter []
@@ -117,16 +117,22 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary,R
     # Go to 3D
     S_prev_3D = np.zeros([3,3])
     S_prev_3D[0:2,0:2] = S_prev
-    F_p_prev_3D = np.eye(3)
-    F_p_prev_3D[0:2,0:2] = F_p_prev
+
     F_3D = np.eye(3)
     F_3D[0:2,0:2] = F
 
+    F_e_prev = np.dot(F, np.linalg.inv(F_p_prev)) # This is a guess
+
+    F_p_current, g_current = calculateNextPlastic(F_p_prev,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_prev, S_prev,R)
+
+
+    F_p_current_3D = np.eye(3)
+    F_p_current_3D[0:2,0:2] = F_p_current
 
     # Plastic deformation inverse
-    F_p_inv_prev = np.linalg.inv(F_p_prev_3D)
+    F_p_inv_prev = np.linalg.inv(F_p_current_3D)
     # Elastic deformation gradient
-    F_e_prev = np.dot(F_3D,F_p_inv_prev)
+    F_e_prev = np.dot(F_3D,F_p_inv_prev) # This is actually a current value, not a previous value.
     # print("F",F)
     # print("F_e_prev",F_e_prev)
     # time.sleep(3)
@@ -205,4 +211,4 @@ def computeSecondPiolaResidualJacobian(S_prev,F_p_prev,F,g,dt,const_dictionary,R
     II=II[0:2,0:2,0:2,0:2]
     J_S = II- np.tensordot(C_ela_2d,S_tangent[0:2,0:2,0:2,0:2],axes=2)
     # print("J_S",J_S)
-    return res_S, J_S, F_e_prev
+    return res_S, J_S, F_e_prev, g_current, F_p_current

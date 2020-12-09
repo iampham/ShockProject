@@ -152,7 +152,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     # according to the current shockwave boundary and coordinates of ip, update v
                     
                     # Residual and Jacobian to compute Next Stress                    
-                    res_S, J_S, F_e_current = computeSecondPiolaResidualJacobian(S_prev,F_p_current_loc,F,g_prev_loc,dt,const_dictionary,R) 
+                    res_S, J_S, F_e_current, g_current, F_p_next_loc = computeSecondPiolaResidualJacobian(S_prev,F_p_current_loc,F,g_prev_loc,dt,const_dictionary,R,g_prev_loc) 
                     F_e_current=F_e_current[0:2,0:2]
                     # compute delta_S and add it to S
                     # slice 3d to 2d before the tensordot and increment 
@@ -183,7 +183,7 @@ def assembleRRKK(const_dictionary,Nvec, dNvecdxi, n_nodes, n_elem, elements, nod
                     # end of S loop
 
                     
-                F_p_next_loc, g_current = calculateNextPlastic(F_p_current_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current,R)
+                # F_p_next_loc, g_current = calculateNextPlastic(F_p_current_loc,gamma_dot_ref, m, g_sat, g_prev_loc, a, h, dt, F_e_current, S_current,R)
                 # print("F_p_current",F_p_current)
                 g_diff = np.abs(g_prev_loc-g_current)
                 # if g_diff>g_max:

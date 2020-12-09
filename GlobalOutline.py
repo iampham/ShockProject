@@ -69,8 +69,8 @@ const_dictionary={"Gamma" : 0.7, # Mie Gruneisen Parameter []
 # Loop over time steps n 
 # TODO: start time changed here
 timeStart = 0.
-timeEnd =timeStart+ 0.5
-nSteps = 30
+timeEnd =timeStart+ 1
+nSteps = 60
 t_vec = np.linspace(timeStart,timeEnd, nSteps)
 
 # Calculate the size of the timestep
@@ -96,7 +96,7 @@ node_X = np.array([[0.,0.],[1.,0.],[1.,1.],[0.,1.],
                    [0.27,0.25],[0.75,0.27],[0.73,0.75],[0.25,0.73]])
 elements = np.array([[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7],[4,5,6,7]])
 
-orientations=np.array([9.,0.,36.,0.,0.])/180.*np.pi *0. # NO ORIENTATION
+orientations=np.array([0.,0.,0.,0.,0.])/180.*np.pi *0. # NO ORIENTATION
 R_all=np.zeros([3,3,n_elem]) # R matrix for each element
 for i in range(n_elem):
     theta=orientations[i]
@@ -244,7 +244,7 @@ for tIndex in range(1, len(t_vec)):
     if tIndex<len(t_vec)/2:
         bc_inc=1.
     else:
-        bc_inc=-1.
+        bc_inc=-1. * 0.6
     # update boudary conditions
     # Apply the deformation to all the boundary nodes in the mesh, for the rest just keep original coords
     for i in range(n_nodes):
@@ -319,7 +319,7 @@ for tIndex in range(1, len(t_vec)):
     # u_current = u_next
     # v_current = v_next
     # a_current = a_next
-    filename = 'FEAData_unloading' 
+    filename = 'FEAData_unloading_1s' 
     np.savez(filename, S_all = S_all, sigma_all = sigma_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, u_vec = u_vec, node_X = node_X, elements = elements)
 
 
@@ -327,5 +327,5 @@ for tIndex in range(1, len(t_vec)):
 # Saves files in .npz file. To read, just use the command np.load('FEAData.npz'). 
 # The load command will output a dictionary containing all of the data shown here. 
 # To access the data, access it like you would a dictionary. 
-filename = 'FEAData_unloading' 
+filename = 'FEAData_unloading_1s' 
 np.savez(filename, S_all = S_all, sigma_all = sigma_all, F_all = F_all, F_e_all = F_e_all, F_p_all = F_p_all, g_all = g_all,timeStart=timeStart,timeEnd=timeEnd,nSteps=nSteps, n_IP=n_IP, n_elem=n_elem, u_vec = u_vec, node_X = node_X, elements = elements)
