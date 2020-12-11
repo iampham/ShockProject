@@ -543,6 +543,9 @@ FiniteStrainUObasedCP::calcJacobian()
         deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
       }
 
+  // num slip rates 
+  // i=m in our equations
+
   for (unsigned int i = 0; i < _num_uo_slip_rates; ++i)
   {
     unsigned int nss = _uo_slip_rates[i]->variableSize();
@@ -550,11 +553,18 @@ FiniteStrainUObasedCP::calcJacobian()
     std::vector<Real> dslipdtau;
     dslipdtau.resize(nss);
     _uo_slip_rates[i]->calcSlipRateDerivative(_qp, _dt, dslipdtau);
+
+    // nss = number of slip systems 
+    // j=alpha in our equations
+
     for (unsigned int j = 0; j < nss; j++)
     {
       dtaudpk2[j] = (*_flow_direction[i])[_qp][j];
       dfpinvdslip[j] = -_fp_old_inv * (*_flow_direction[i])[_qp][j];
     }
+
+    // nss = number of slip systems 
+    // j=alpha in our equations
 
     for (unsigned int j = 0; j < nss; j++)
       dfpinvdpk2 += (dfpinvdslip[j] * dslipdtau[j] * _dt).outerProduct(dtaudpk2[j]);
